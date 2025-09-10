@@ -1,0 +1,2 @@
+# demperm
+Démocratie permanente

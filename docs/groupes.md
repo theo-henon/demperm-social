@@ -7,15 +7,28 @@ Il sera possible de créer des sous-groupes.
 
 Responsable : 
 
-Membre :
+Membres :
 
-* A
-* B
-* C
+* Fabien Burguion (1)
+* Mélody Bastien (1)
 
 ## Serveur social
 
+Responsable : 
+
+Membres :
+
+* Fabien Burguion (2)
+* Mélody Bastien (2)
+
 ## Client Web
+
+Responsable : 
+
+Membres : 
+
+* Fabien Burguion (3)
+* Mélody Bastien (3)
 
 ## Client Android
 

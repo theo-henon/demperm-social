@@ -5,7 +5,7 @@ Il sera possible de créer des sous-groupes.
 
 ## Serveur de vote
 
-Responsable : 
+Responsable : Melody Bastien
 
 Membres (vert) :
 
@@ -22,11 +22,10 @@ Membres (vert) :
 
 ## Serveur social
 
-Responsable : 
+Responsable : Marc Mage
 
 Membres (rouge) :
 
-* Florent Marechaux
 * Kendrick Ory
 * Gaëtan Maronne
 * Daniel Malinowski
@@ -53,19 +52,21 @@ Membres (gris bleu) :
 * Kahel Bulin
 * Timothé Kerbaje
 
-
 ## Client Android
 
-Responsable : 
+Responsable : Hugo Saison
 
 Membres (vert pale) : 
 
 * Clément Rehs
-* Antonin Suzor
 * Flavien Hallier
 * Paloma Martin
 * Hugo Saison
 * Mathéo Kiffer
+* Hédelin Ropital
+* Timothee Viossat
+* Antoine Havard
+
 
 ## Client iOS
 
@@ -74,16 +75,16 @@ Responsable : Titouan Gragnic
 Membres (orange) : 
 
 * Omri Zakaria Dakka
-* Kahel Bulin
 * Inès Metiba
 * Alex Blanco
 * Pierre Maunier
 * Titouan Gragnic
 * Basile Sens
+* Geoffroy Jouanin
 
 ## Sécurité
 
-Responsable : 
+Responsable : Aoudia Lilia et Jules Lestienne
 
 Membres (jaune) : 
 
@@ -92,3 +93,7 @@ Membres (jaune) :
 * El Mokhtar Boussalef
 * Antoine Luciani
 * Khatir Youyou
+* Alexandre Helias
+* Lilia Aoudia
+* Geoffrey Elbaz
+* Francisco Lara Rico

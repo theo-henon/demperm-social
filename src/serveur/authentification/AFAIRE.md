@@ -1,0 +1,35 @@
+# Pour le 21/10
+
+Choisir son groupe, indiquer si on désire diriger son groupe
+
+# Pour le 28/10
+
+## Protocole
+
+Définir le protpcole entre les serveurs et les clients. Avoir une v1
+finie et disponible sur le dépôt. 
+
+Présentation de 10mn. Déposer la présentation sur le dépôt.
+
+Pour cela on constitue un groupe de travail Protocole avec
+
+* 3 serveur vote
+* 3 serveur social
+* 2 client web
+* 2 client android
+* 2 client ios
+* 2 sécurité
+
+## Architecture
+
+Les deux groupes serveurs doivent chacun rédiger un document
+qui définit les choix architecturaux retenus. Un squelette de dossiers
+voire une mini-démo sont les bienvenus.
+
+## Interface
+
+Chaque groupe client doit préparer des images de toutes les pages
+visibles de son client avec un graphique qui relie les pages.
+Les dessins peuvent être fait à la main.
+
+Présentation de 10 mn pour chaque groupe. Déposer la présentation sur le dépôt.

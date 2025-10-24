@@ -38,7 +38,7 @@ Membres (rouge) :
 
 ## Client Web
 
-Responsable : 
+Responsable : Kahel Bulin
 
 Membres (gris bleu) : 
 

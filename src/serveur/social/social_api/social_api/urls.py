@@ -37,5 +37,6 @@ urlpatterns = [
     path("api/v1/", include("comments.urls")),
     path("api/v1/subscriptions/", include("subscriptions.urls")),
     path("api/v1/friends/", include("friends.urls")),
+    path("api/v1/tags/", include("tags.urls")),
     path('api/v1/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]

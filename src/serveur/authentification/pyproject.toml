@@ -1,0 +1,10 @@
+[project]
+name = "google_oauth"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+  "Flask",
+  "google-auth",
+  "requests"
+]

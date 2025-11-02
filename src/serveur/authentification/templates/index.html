@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Connexion Google</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <h2>Connexion avec Google</h2>
+
+  <div id="g_id_onload"
+       data-client_id="487631491277-nbbt1qft0po6nfhrmirlbhtrt796iqt2.apps.googleusercontent.com"
+       data-context="signin"
+       data-ux_mode="popup"
+       data-callback="handleCredentialResponse">
+  </div>
+
+  <div class="g_id_signin" data-type="standard"></div>
+
+  <script>
+    function handleCredentialResponse(response) {
+      fetch('/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ token: response.credential })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.valid) {
+            alert("Bienvenue " + data.name + "<" + data.email + ">");
+        } else {
+          alert("Échec de l'authentification.");
+        }
+      });
+    }
+  </script>
+</body>
+</html>

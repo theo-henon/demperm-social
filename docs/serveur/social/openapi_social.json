@@ -1,0 +1,604 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "R\u00e9seau Social Politique API",
+    "version": "1.0.0",
+    "description": "Sp\u00e9cification OpenAPI compl\u00e8te sans vote-chain, avec forums, sous-forums, posts, tags, abonnements, utilisateurs, followers et messagerie."
+  },
+  "paths": {
+    "/api/v1/users/me": {
+      "get": {
+        "summary": "Profil connect\u00e9",
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "get": {
+        "summary": "Profil public",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/users/search": {
+      "get": {
+        "summary": "Recherche utilisateur par username",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/followers": {
+      "get": {
+        "summary": "Liste des followers",
+        "tags": [
+          "Followers"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/following": {
+      "get": {
+        "summary": "Liste des suivis",
+        "tags": [
+          "Followers"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/follow/{id}": {
+      "post": {
+        "summary": "Suivre un utilisateur",
+        "tags": [
+          "Followers"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/unfollow/{id}": {
+      "delete": {
+        "summary": "Se d\u00e9sabonner d\u2019un utilisateur",
+        "tags": [
+          "Followers"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/messages/{id}/send": {
+      "post": {
+        "summary": "Envoyer un message priv\u00e9",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Message envoy\u00e9"
+          }
+        }
+      }
+    },
+    "/api/v1/messages/{id}": {
+      "get": {
+        "summary": "Voir les messages \u00e9chang\u00e9s",
+        "tags": [
+          "Messages"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/forums/{id}": {
+      "post": {
+        "summary": "S\u2019abonner \u00e0 un forum",
+        "tags": [
+          "Subscriptions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/forums/{id}/unsubscribe": {
+      "delete": {
+        "summary": "Se d\u00e9sabonner d\u2019un forum",
+        "tags": [
+          "Subscriptions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/subforums/{id}": {
+      "post": {
+        "summary": "S\u2019abonner \u00e0 un sous-forum",
+        "tags": [
+          "Subscriptions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/subforums/{id}/unsubscribe": {
+      "delete": {
+        "summary": "Se d\u00e9sabonner d\u2019un sous-forum",
+        "tags": [
+          "Subscriptions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/domains": {
+      "get": {
+        "summary": "Liste des domaines",
+        "tags": [
+          "Domains"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/domains/{id}": {
+      "get": {
+        "summary": "D\u00e9tails d\u2019un domaine",
+        "tags": [
+          "Domains"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/forums": {
+      "get": {
+        "summary": "Liste des forums",
+        "tags": [
+          "Forums"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/forums/create": {
+      "post": {
+        "summary": "Cr\u00e9er un forum",
+        "tags": [
+          "Forums"
+        ],
+        "responses": {
+          "201": {
+            "description": "Forum cr\u00e9\u00e9"
+          }
+        }
+      }
+    },
+    "/api/v1/forums/{id}": {
+      "get": {
+        "summary": "D\u00e9tails d\u2019un forum",
+        "tags": [
+          "Forums"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/forums/me": {
+      "get": {
+        "summary": "Forums suivis par l\u2019utilisateur",
+        "tags": [
+          "Forums"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/forums/search": {
+      "get": {
+        "summary": "Recherche de forums",
+        "tags": [
+          "Forums"
+        ],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/forums/{id}/subforums": {
+      "get": {
+        "summary": "Liste des sous-forums",
+        "tags": [
+          "Forums"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/forums/{id}/subforums/create": {
+      "post": {
+        "summary": "Cr\u00e9er un sous-forum",
+        "tags": [
+          "Forums"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sous-forum cr\u00e9\u00e9"
+          }
+        }
+      }
+    },
+    "/api/v1/posts/create": {
+      "post": {
+        "summary": "Cr\u00e9er un post",
+        "tags": [
+          "Posts"
+        ],
+        "responses": {
+          "201": {
+            "description": "Post cr\u00e9\u00e9"
+          }
+        }
+      }
+    },
+    "/api/v1/posts/{id}": {
+      "get": {
+        "summary": "D\u00e9tails d\u2019un post",
+        "tags": [
+          "Posts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}/posts": {
+      "get": {
+        "summary": "Posts d\u2019un utilisateur",
+        "tags": [
+          "Posts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/posts/{id}/delete": {
+      "delete": {
+        "summary": "Supprimer un post",
+        "tags": [
+          "Posts"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Supprim\u00e9"
+          }
+        }
+      }
+    },
+    "/api/v1/tags": {
+      "get": {
+        "summary": "Liste des tags",
+        "tags": [
+          "Tags"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/tags/create": {
+      "post": {
+        "summary": "Cr\u00e9er un tag",
+        "tags": [
+          "Tags"
+        ],
+        "responses": {
+          "201": {
+            "description": "Tag cr\u00e9\u00e9"
+          }
+        }
+      }
+    },
+    "/api/v1/tags/assign/{post_id}": {
+      "post": {
+        "summary": "Assigner des tags \u00e0 un post",
+        "tags": [
+          "Tags"
+        ],
+        "parameters": [
+          {
+            "name": "post_id",
+            "in": "path",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tags assign\u00e9s"
+          }
+        }
+      }
+    },
+    "/api/v1/domains/{id}/subforums": {
+      "get": {
+        "summary": "Liste des sous-forums d\u2019un domaine",
+        "tags": [
+          "Domains"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/domains/{id}/subforums/create": {
+      "post": {
+        "summary": "Cr\u00e9er un sous-forum dans un domaine",
+        "tags": [
+          "Domains"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Sous-forum cr\u00e9\u00e9"
+          }
+        }
+      }
+    }
+  }
+}

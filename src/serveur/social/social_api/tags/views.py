@@ -41,7 +41,7 @@ class TagListView(APIView):
 
 class AssignTagsToTopicView(APIView):
     @swagger_auto_schema(
-        operation_description="Assigne des tags à un topic",
+        operation_description="Assigner des tags à un post",
         tags=["Tags"],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -55,14 +55,14 @@ class AssignTagsToTopicView(APIView):
             required=['tags']
         ),
         responses={
-            200: openapi.Response(description="Tags assignés au topic"),
+            200: openapi.Response(description="Tags assignés au post"),
             400: openapi.Response(description="Requête invalide"),
             401: openapi.Response(description="Non authentifié"),
-            404: openapi.Response(description="Topic ou tag non trouvé")
+            404: openapi.Response(description="Post ou tag non trouvé")
         }
     )
-    def post(self, request, topic_id):
+    def post(self, request, post_id):
         return Response({
-            "topic_id": topic_id,
+            "post_id": post_id,
             "assigned_tags": request.data.get("tags", [])
         }, status=status.HTTP_200_OK)

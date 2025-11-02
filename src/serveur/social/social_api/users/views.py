@@ -38,18 +38,6 @@ class UserMeView(APIView):
             }
         })
 
-    @swagger_auto_schema(
-        operation_description="Met à jour le profil de l’utilisateur connecté",
-        tags=["Users"],
-        responses={
-            200: openapi.Response(description="Groupes trouvés"),
-            404: openapi.Response(description="Utilisateur ou groupes non trouvés"),
-            401: openapi.Response(description="Non authentifié")
-        }
-    )
-    def patch(self, request):
-        return Response({"message": "Profil mis à jour (mock)"})
-
 
 class UserDetailView(APIView):
     @swagger_auto_schema(
@@ -86,21 +74,63 @@ class UserDetailView(APIView):
         })
 
 
-class UserGroupsView(APIView):
+class UserSearchView(APIView):
     @swagger_auto_schema(
-        operation_description="Liste les groupes rejoints par l’utilisateur",
+        operation_description="Recherche utilisateur par username",
         tags=["Users"],
+        manual_parameters=[
+            openapi.Parameter(
+                'username',
+                openapi.IN_QUERY,
+                description="Nom d'utilisateur à rechercher",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
         responses={
-            200: openapi.Response(description="Groupes trouvés"),
-            404: openapi.Response(description="Utilisateur ou groupes non trouvés"),
+            200: openapi.Response(description="Résultats de recherche"),
+            401: openapi.Response(description="Non authentifié")
+        }
+    )
+    def get(self, request):
+        username = request.GET.get('username', '')
+        # TODO: Implémenter la recherche réelle
+        
+        return Response([
+            {
+                "id": 1,
+                "username": username,
+                "bio": "Utilisateur trouvé"
+            }
+        ])
+
+
+class UserPostsView(APIView):
+    @swagger_auto_schema(
+        operation_description="Posts d'un utilisateur",
+        tags=["Posts"],
+        responses={
+            200: openapi.Response(description="Liste des posts"),
+            404: openapi.Response(description="Utilisateur non trouvé"),
             401: openapi.Response(description="Non authentifié")
         }
     )
     def get(self, request, id):
-        # TODO
-
+        # TODO: Implémenter la récupération des posts
+        
         return Response([
-            {"id": 3, "name": "Écologie"},
-            {"id": 4, "name": "Technologie"},
-            {"id": 5, "name": "Politique"}
+            {
+                "id": 1,
+                "title": "Mon premier post",
+                "content": "Contenu du post",
+                "author_id": id,
+                "created_at": "2025-01-15T10:30:00Z"
+            },
+            {
+                "id": 2,
+                "title": "Deuxième post",
+                "content": "Autre contenu",
+                "author_id": id,
+                "created_at": "2025-01-16T14:20:00Z"
+            }
         ])

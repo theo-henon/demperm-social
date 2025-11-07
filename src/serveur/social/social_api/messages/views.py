@@ -5,42 +5,9 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 
-class SendMessageView(APIView):
+class ConversationView(APIView):
     @swagger_auto_schema(
-        operation_description="Envoyer un message privé",
-        tags=["Messages"],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'content': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="Contenu du message"
-                )
-            },
-            required=['content']
-        ),
-        responses={
-            201: openapi.Response(description="Message envoyé"),
-            400: openapi.Response(description="Données invalides"),
-            401: openapi.Response(description="Non authentifié"),
-            404: openapi.Response(description="Utilisateur non trouvé")
-        }
-    )
-    def post(self, request, id):
-        # TODO: Implémenter l'envoi de message
-        content = request.data.get('content', '')
-        
-        return Response({
-            "id": 1,
-            "recipient_id": id,
-            "content": content,
-            "sent_at": "2025-11-02T12:00:00Z"
-        }, status=status.HTTP_201_CREATED)
-
-
-class MessageThreadView(APIView):
-    @swagger_auto_schema(
-        operation_description="Voir les messages échangés",
+        operation_description="Voir les messages échangés avec un utilisateur spécifique",
         tags=["Messages"],
         responses={
             200: openapi.Response(description="Messages trouvés"),
@@ -68,3 +35,65 @@ class MessageThreadView(APIView):
                 }
             ]
         }, status=status.HTTP_200_OK)
+
+
+class ConversationsListView(APIView):
+    @swagger_auto_schema(
+        operation_description="Lister les conversations de l'utilisateur",
+        tags=["Messages"],
+        responses={
+            200: openapi.Response(description="Conversations trouvées"),
+            401: openapi.Response(description="Non authentifié")
+        }
+    )
+    def get(self, request):
+        # TODO: Récupérer les conversations réelles depuis la base de données
+        return Response({
+            "conversations": [
+                {
+                    "chat_id": 1,
+                    "username": "alice",
+                    "profile_picture": "https://example.com/profiles/alice.jpg"
+                },
+                {
+                    "chat_id": 2,
+                    "username": "bob",
+                    "profile_picture": "https://example.com/profiles/bob.jpg"
+                }
+            ]
+        }, status=status.HTTP_200_OK)
+
+
+class CreateConversationView(APIView):
+    @swagger_auto_schema(
+        operation_description="Créer une nouvelle conversation avec un utilisateur",
+        tags=["Messages"],
+        responses={
+            201: openapi.Response(description="Conversation créée"),
+            400: openapi.Response(description="Données invalides"),
+            401: openapi.Response(description="Non authentifié"),
+            404: openapi.Response(description="Utilisateur non trouvé")
+        }
+    )
+    def post(self, request, id):
+        # TODO: Implémenter la création réelle de conversation
+        return Response({
+            "chat_id": 3,
+            "participant_id": id,
+            "created_at": "2025-11-07T12:00:00Z"
+        }, status=status.HTTP_201_CREATED)
+
+
+class DeleteConversationView(APIView):
+    @swagger_auto_schema(
+        operation_description="Supprimer une conversation avec un utilisateur spécifique",
+        tags=["Messages"],
+        responses={
+            204: openapi.Response(description="Conversation supprimée"),
+            401: openapi.Response(description="Non authentifié"),
+            404: openapi.Response(description="Conversation non trouvée")
+        }
+    )
+    def delete(self, request, id):
+        # TODO: Implémenter la suppression réelle de conversation
+        return Response(status=status.HTTP_204_NO_CONTENT)

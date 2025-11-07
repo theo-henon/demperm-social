@@ -206,3 +206,69 @@ class UserDiscoverView(APIView):
                 "joined_at": "2025-10-02T10:00:00Z"
             }
         ], status=status.HTTP_200_OK)
+
+
+class UserSettingsView(APIView):
+    @swagger_auto_schema(
+        operation_description="Met à jour les paramètres de l'utilisateur connecté",
+        tags=["Users"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email_notifications': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                'privacy': openapi.Schema(type=openapi.TYPE_STRING),
+                'language': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={
+            200: openapi.Response(description="Paramètres mis à jour"),
+            400: openapi.Response(description="Requête invalide"),
+            401: openapi.Response(description="Non authentifié")
+        }
+    )
+    def patch(self, request):
+        data = request.data or {}
+        email_notifications = data.get('email_notifications', True)
+        privacy = data.get('privacy', 'public')
+        language = data.get('language', 'fr')
+        updated_settings = {
+            "email_notifications": email_notifications,
+            "privacy": privacy,
+            "language": language
+        }
+        return Response(updated_settings, status=status.HTTP_200_OK)
+
+
+class UserBulkView(APIView):
+    @swagger_auto_schema(
+        operation_description="Récupère les profils de plusieurs utilisateurs en une seule requête",
+        tags=["Users"],
+        manual_parameters=[
+            openapi.Parameter(
+                'ids',
+                openapi.IN_QUERY,
+                description="Liste d'IDs d'utilisateurs séparés par des virgules (ex: 1,2,3)",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        responses={
+            200: openapi.Response(description="Profils trouvés"),
+            400: openapi.Response(description="Requête invalide"),
+            401: openapi.Response(description="Non authentifié")
+        }
+    )
+    def get(self, request):
+        ids_str = request.GET.get('ids', '')
+        if not ids_str:
+            return Response({"error": "Paramètre 'ids' requis."}, status=status.HTTP_400_BAD_REQUEST)
+        ids = [int(i) for i in ids_str.split(',') if i.isdigit()]
+        # TODO: Récupérer les profils réels depuis la base de données
+        users = [
+            {
+                "id": i,
+                "username": f"utilisateur_{i}",
+                "bio": "Utilisateur actif de la plateforme"
+            } for i in ids
+        ]
+        return Response(users, status=status.HTTP_200_OK)

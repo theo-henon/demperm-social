@@ -18,13 +18,15 @@ demperm/src/serveur/social
     │
     ├─── apps
     │   │
-    │   │
-    │   │
-    │   ├─── posts
+    │   ├─── comments
     │   │       urls.py
     │   │       views.py
     │   │       __init__.py
     │   │
+    │   ├─── domains
+    │   │       urls.py
+    │   │       views.py
+    │   │       __init__.py
     │   │
     │   ├───followers
     │   │       urls.py
@@ -36,17 +38,22 @@ demperm/src/serveur/social
     │   │       views.py
     │   │       __init__.py
     │   │
+    │   ├───messages
+    │   │       urls.py
+    │   │       views.py
+    │   │       __init__.py
+    │   │
+    │   ├─── posts
+    │   │       urls.py
+    │   │       views.py
+    │   │       __init__.py
+    │   │
     │	├───subscriptions
     │   │       urls.py
     │   │       views.py
     │   │       __init__.py
     │   │
     │   ├───tags
-    │   │       urls.py
-    │   │       views.py
-    │   │       __init__.py
-    │   │
-    │   ├───subforums
     │   │       urls.py
     │   │       views.py
     │   │       __init__.py

@@ -77,3 +77,65 @@ class PostDeleteView(APIView):
         # TODO: Implémenter la suppression
         
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PostFeedView(APIView):
+    @swagger_auto_schema(
+        operation_description="Récupère le fil d'actualité (feed) des posts",
+        tags=["Posts"],
+        responses={
+            200: openapi.Response(description="Feed récupéré"),
+            401: openapi.Response(description="Non authentifié")
+        }
+    )
+    def get(self, request):
+        # TODO: Implémenter la récupération réelle du feed
+        return Response([
+            {
+                "id": 101,
+                "title": "Post du feed 1",
+                "content": "Contenu du post 1",
+                "author": {"id": 2, "username": "alice"},
+                "created_at": "2025-11-02T13:00:00Z",
+                "comments_count": 2
+            },
+            {
+                "id": 102,
+                "title": "Post du feed 2",
+                "content": "Contenu du post 2",
+                "author": {"id": 3, "username": "bob"},
+                "created_at": "2025-11-02T14:00:00Z",
+                "comments_count": 0
+            }
+        ], status=status.HTTP_200_OK)
+
+
+class PostDiscoverView(APIView):
+    @swagger_auto_schema(
+        operation_description="Découvrir des posts (découverte)",
+        tags=["Posts"],
+        responses={
+            200: openapi.Response(description="Posts découverts"),
+            401: openapi.Response(description="Non authentifié")
+        }
+    )
+    def get(self, request):
+        # TODO: Implémenter la logique réelle de découverte
+        return Response([
+            {
+                "id": 201,
+                "title": "Post découverte 1",
+                "content": "Contenu du post découverte 1",
+                "author": {"id": 4, "username": "charlie"},
+                "created_at": "2025-11-03T10:00:00Z",
+                "comments_count": 1
+            },
+            {
+                "id": 202,
+                "title": "Post découverte 2",
+                "content": "Contenu du post découverte 2",
+                "author": {"id": 5, "username": "diana"},
+                "created_at": "2025-11-03T11:00:00Z",
+                "comments_count": 3
+            }
+        ], status=status.HTTP_200_OK)

@@ -1,98 +1,117 @@
+"""
+Views pour l'app forums
+"""
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+from core.models import User, Forum
+from .serializers import ForumSerializer, ForumCreateSerializer, ForumUpdateSerializer
+
 
 class ForumListView(APIView):
+    """Liste tous les forums (racine uniquement)"""
+    permission_classes = [IsAuthenticated]
+    
     @swagger_auto_schema(
-        operation_description="Liste des forums",
+        operation_description="Liste des forums racine",
         tags=["Forums"],
         responses={
-            200: openapi.Response(description="Liste des forums"),
+            200: ForumSerializer(many=True),
             401: openapi.Response(description="Non authentifié")
         }
     )
     def get(self, request):
-        # TODO: Implémenter la récupération des forums
+        forums = Forum.objects.filter(
+            parent_forum__isnull=True
+        ).select_related('created_by').order_by('-created_at')
         
-        return Response([
-            {"id": 1, "name": "Forum général", "description": "Discussions générales"},
-            {"id": 2, "name": "Actualités", "description": "L'actualité du jour"}
-        ], status=status.HTTP_200_OK)
+        serializer = ForumSerializer(forums, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ForumCreateView(APIView):
+    """Créer un forum"""
+    permission_classes = [IsAuthenticated]
+    
     @swagger_auto_schema(
         operation_description="Créer un forum",
         tags=["Forums"],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'name': openapi.Schema(type=openapi.TYPE_STRING, description="Nom du forum"),
-                'description': openapi.Schema(type=openapi.TYPE_STRING, description="Description du forum")
-            },
-            required=['name']
-        ),
+        request_body=ForumCreateSerializer,
         responses={
-            201: openapi.Response(description="Forum créé"),
+            201: ForumSerializer,
             400: openapi.Response(description="Données invalides"),
             401: openapi.Response(description="Non authentifié")
         }
     )
     def post(self, request):
-        # TODO: Implémenter la création de forum
-        name = request.data.get('name', '')
-        description = request.data.get('description', '')
+        serializer = ForumCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         
-        return Response({
-            "id": 10,
-            "name": name,
-            "description": description
-        }, status=status.HTTP_201_CREATED)
+        parent_forum = None
+        if serializer.validated_data.get('parent_forum_uuid'):
+            parent_forum = get_object_or_404(
+                Forum, 
+                public_uuid=serializer.validated_data['parent_forum_uuid']
+            )
+        
+        forum = Forum.objects.create(
+            name=serializer.validated_data['name'],
+            description=serializer.validated_data.get('description', ''),
+            created_by=request.user,
+            parent_forum=parent_forum
+        )
+        
+        response_serializer = ForumSerializer(forum)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ForumDetailView(APIView):
+    """Détails d'un forum"""
+    permission_classes = [IsAuthenticated]
+    
     @swagger_auto_schema(
         operation_description="Détails d'un forum",
         tags=["Forums"],
         responses={
-            200: openapi.Response(description="Forum trouvé"),
+            200: ForumSerializer,
             404: openapi.Response(description="Forum non trouvé"),
             401: openapi.Response(description="Non authentifié")
         }
     )
     def get(self, request, id):
-        # TODO: Implémenter la récupération d'un forum
-        
-        return Response({
-            "id": id,
-            "name": "Forum général",
-            "description": "Discussions générales",
-            "subscribers_count": 150
-        }, status=status.HTTP_200_OK)
+        forum = get_object_or_404(Forum, public_uuid=id)
+        serializer = ForumSerializer(forum)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ForumMeView(APIView):
+    """Forums suivis par l'utilisateur connecté"""
+    permission_classes = [IsAuthenticated]
+    
     @swagger_auto_schema(
         operation_description="Forums suivis par l'utilisateur",
         tags=["Forums"],
         responses={
-            200: openapi.Response(description="Liste des forums suivis"),
+            200: ForumSerializer(many=True),
             401: openapi.Response(description="Non authentifié")
         }
     )
     def get(self, request):
-        # TODO: Implémenter la récupération des forums suivis
-        
-        return Response([
-            {"id": 1, "name": "Forum général"},
-            {"id": 3, "name": "Technologie"}
-        ], status=status.HTTP_200_OK)
+        # TODO: Implémenter avec un modèle de subscription plus tard
+        # Pour l'instant, retourner une liste vide
+        return Response([], status=status.HTTP_200_OK)
 
 
 class ForumSearchView(APIView):
+    """Recherche de forums"""
+    permission_classes = [IsAuthenticated]
+    
     @swagger_auto_schema(
         operation_description="Recherche de forums",
         tags=["Forums"],
@@ -106,65 +125,75 @@ class ForumSearchView(APIView):
             )
         ],
         responses={
-            200: openapi.Response(description="Résultats de recherche"),
+            200: ForumSerializer(many=True),
             401: openapi.Response(description="Non authentifié")
         }
     )
     def get(self, request):
-        query = request.GET.get('query', '')
-        # TODO: Implémenter la recherche
+        query = request.GET.get('query', '').strip()
         
-        return Response([
-            {"id": 1, "name": f"Forum contenant '{query}'"}
-        ], status=status.HTTP_200_OK)
+        if not query:
+            return Response([], status=status.HTTP_200_OK)
+        
+        forums = Forum.objects.filter(
+            Q(name__icontains=query) | Q(description__icontains=query)
+        ).select_related('created_by').order_by('-created_at')[:20]
+        
+        serializer = ForumSerializer(forums, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ForumSubforumsView(APIView):
+    """Liste des sous-forums d'un forum"""
+    permission_classes = [IsAuthenticated]
+    
     @swagger_auto_schema(
         operation_description="Liste des sous-forums",
         tags=["Forums"],
         responses={
-            200: openapi.Response(description="Liste des sous-forums"),
+            200: ForumSerializer(many=True),
             404: openapi.Response(description="Forum non trouvé"),
             401: openapi.Response(description="Non authentifié")
         }
     )
     def get(self, request, id):
-        # TODO: Implémenter la récupération des sous-forums
+        parent_forum = get_object_or_404(Forum, public_uuid=id)
         
-        return Response([
-            {"id": 1, "name": "Sous-forum 1", "forum_id": id},
-            {"id": 2, "name": "Sous-forum 2", "forum_id": id}
-        ], status=status.HTTP_200_OK)
+        subforums = Forum.objects.filter(
+            parent_forum=parent_forum
+        ).select_related('created_by').order_by('name')
+        
+        serializer = ForumSerializer(subforums, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ForumSubforumCreateView(APIView):
+    """Créer un sous-forum"""
+    permission_classes = [IsAuthenticated]
+    
     @swagger_auto_schema(
         operation_description="Créer un sous-forum",
         tags=["Forums"],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'name': openapi.Schema(type=openapi.TYPE_STRING, description="Nom du sous-forum"),
-                'description': openapi.Schema(type=openapi.TYPE_STRING, description="Description du sous-forum")
-            },
-            required=['name']
-        ),
+        request_body=ForumCreateSerializer,
         responses={
-            201: openapi.Response(description="Sous-forum créé"),
+            201: ForumSerializer,
             400: openapi.Response(description="Données invalides"),
             401: openapi.Response(description="Non authentifié"),
-            404: openapi.Response(description="Forum non trouvé")
+            404: openapi.Response(description="Forum parent non trouvé")
         }
     )
     def post(self, request, id):
-        # TODO: Implémenter la création de sous-forum
-        name = request.data.get('name', '')
-        description = request.data.get('description', '')
+        parent_forum = get_object_or_404(Forum, public_uuid=id)
         
-        return Response({
-            "id": 10,
-            "name": name,
-            "description": description,
-            "forum_id": id
-        }, status=status.HTTP_201_CREATED)
+        serializer = ForumCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        forum = Forum.objects.create(
+            name=serializer.validated_data['name'],
+            description=serializer.validated_data.get('description', ''),
+            created_by=request.user,
+            parent_forum=parent_forum
+        )
+        
+        response_serializer = ForumSerializer(forum)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)

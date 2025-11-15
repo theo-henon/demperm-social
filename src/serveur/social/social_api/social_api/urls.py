@@ -31,13 +31,16 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # Authentication
+    path("api/v1/auth/", include("authentication.urls")),
+    # Main endpoints
     path("api/v1/users/", include("users.urls")),
-    path("api/v1/subscriptions/", include("subscriptions.urls")),
-    path("api/v1/tags/", include("tags.urls")),
-    path("api/v1/", include("followers.urls")),
-    path("api/v1/", include("messages.urls")),
-    path("api/v1/domains/", include("domains.urls")),
-    path("api/v1/forums/", include("forums.urls")),
     path("api/v1/posts/", include("posts.urls")),
+    path("api/v1/", include("followers.urls")),
+    path("api/v1/messages/", include("messaging.urls")),
+    path("api/v1/forums/", include("forums.urls")),
+    path("api/v1/tags/", include("tags.urls")),
+    path("api/v1/subscriptions/", include("subscriptions.urls")),
+    path("api/v1/domains/", include("domains.urls")),
     path('api/v1/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]

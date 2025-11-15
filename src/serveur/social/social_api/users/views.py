@@ -1,153 +1,377 @@
+"""
+Users API views.
+Based on Specifications.md section 4.1.
+"""
+import time
+from django.db.models import Q
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from core.models import User, Follower, AuditLog
+from core.serializers import UserPublicSerializer
+from core.permissions import PrivacyGuard
+from .serializers import UserProfileSerializer, UserSettingsSerializer
+
+
+def get_client_ip(request):
+    """Extract client IP from request."""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0]
+    return request.META.get('REMOTE_ADDR')
 
 
 class UserMeView(APIView):
+    """GET/PATCH /api/v1/users/me"""
+    permission_classes = [IsAuthenticated]
+    
     @swagger_auto_schema(
         operation_description="Récupère les informations du profil connecté",
         tags=["Users"],
-        responses={
-            200: openapi.Response(description="Profil trouvé"),
-            404: openapi.Response(description="Utilisateur non trouvé"),
-            401: openapi.Response(description="Non authentifié")
-        }
+        responses={200: openapi.Response(description="Profil trouvé")}
     )
     def get(self, request):
-        # TODO
-
-        return Response({
-            "id": 1,
-            "username": "theo.henon",
-            "bio": "Développeur engagé",
-            "followers": 42,
-            "following": 17,
-            "groups": [
-                {"id": 1, "name": "Numérique & IA"},
-                {"id": 2, "name": "Social"},
-                {"id": 3, "name": "Environnement"},
-            ],
-            "topics": [
-                {"id": 1, "title": "L'impact de l'IA sur la société et l'environnement"}
-            ],
-            "subscriptions": {
-                "users": 10,
-                "topics": 5,
-                "groups": 3
-            }
-        })
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_description="Met à jour le profil connecté",
         tags=["Users"],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'username': openapi.Schema(type=openapi.TYPE_STRING),
-                'bio': openapi.Schema(type=openapi.TYPE_STRING),
-            }
-        ),
-        responses={
-            200: openapi.Response(description="Profil mis à jour"),
-            400: openapi.Response(description="Requête invalide"),
-            401: openapi.Response(description="Non authentifié")
-        }
+        request_body=UserProfileSerializer,
+        responses={200: openapi.Response(description="Profil mis à jour")}
     )
     def patch(self, request):
-        data = request.data or {}
-        username = data.get('username', 'theo.henon')
-        bio = data.get('bio', 'Développeur engagé')
+        serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            
+            AuditLog.objects.create(
+                event_type='user.profile.update',
+                actor=request.user,
+                target_type='user',
+                target_id=request.user.id,
+                ip_address=get_client_ip(request)
+            )
+            
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        updated = {
-            "id": 1,
-            "username": username,
-            "bio": bio,
-            "followers": 42,
-            "following": 17,
-            "groups": [
-                {"id": 1, "name": "Numérique & IA"},
-                {"id": 2, "name": "Social"},
-                {"id": 3, "name": "Environnement"},
-            ],
-            "topics": [
-                {"id": 1, "title": "L'impact de l'IA sur la société et l'environnement"}
-            ],
-            "subscriptions": {
-                "users": 10,
-                "topics": 5,
-                "groups": 3
-            }
-        }
 
-        return Response(updated, status=status.HTTP_200_OK)
+class UserSettingsView(APIView):
+    """PATCH /api/v1/users/me/settings"""
+    permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(
+        operation_description="Met à jour les paramètres de l'utilisateur connecté",
+        tags=["Users"],
+        request_body=UserSettingsSerializer,
+        responses={200: openapi.Response(description="Paramètres mis à jour")}
+    )
+    def patch(self, request):
+        serializer = UserSettingsSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserDetailView(APIView):
+    """GET /api/v1/users/{id}"""
+    permission_classes = [IsAuthenticated, PrivacyGuard]
+    
     @swagger_auto_schema(
-        operation_description="Affiche le profil public d’un utilisateur",
+        operation_description="Affiche le profil public d'un utilisateur",
         tags=["Users"],
-        responses={
-            200: openapi.Response(description="Profil trouvé"),
-            404: openapi.Response(description="Utilisateur non trouvé"),
-            401: openapi.Response(description="Non authentifié")
-        }
+        responses={200: openapi.Response(description="Profil trouvé")}
     )
     def get(self, request, id):
-        # TODO
-
-        return Response({
-            "id": id,
-            "username": "utilisateur_" + str(id),
-            "bio": "Utilisateur actif de la plateforme",
-            "followers": 120,
-            "following": 75,
-            "groups": [
-                {"id": 3, "name": "Écologie"},
-                {"id": 4, "name": "Technologie"}
-            ],
-            "topics": [
-                {"id": 7, "title": "Transition énergétique"},
-                {"id": 8, "title": "Nouvelles technologies"}
-            ],
-            "subscriptions": {
-                "users": 20,
-                "topics": 8,
-                "groups": 4
-            }
-        })
+        user = User.objects.filter(public_uuid=id).first()
+        
+        if not user:
+            return Response(
+                {'error': 'Ressource non disponible'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if not PrivacyGuard().has_object_permission(request, self, user):
+            return Response(
+                {'error': 'Ressource non disponible'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = UserPublicSerializer(user)
+        return Response(serializer.data)
 
 
 class UserSearchView(APIView):
+    """GET /api/v1/users/search?query=..."""
+    permission_classes = [IsAuthenticated]
+    
     @swagger_auto_schema(
         operation_description="Recherche utilisateur par username",
         tags=["Users"],
         manual_parameters=[
             openapi.Parameter(
-                'username',
+                'query',
                 openapi.IN_QUERY,
-                description="Nom d'utilisateur à rechercher",
+                description="Terme de recherche (min 3 chars)",
                 type=openapi.TYPE_STRING,
                 required=True
             )
         ],
-        responses={
-            200: openapi.Response(description="Résultats de recherche"),
-            401: openapi.Response(description="Non authentifié")
-        }
+        responses={200: openapi.Response(description="Résultats de recherche")}
     )
     def get(self, request):
-        username = request.GET.get('username', '')
-        # TODO: Implémenter la recherche réelle
+        start_time = time.time()
+        query = request.GET.get('query', '').strip()
         
-        return Response([
-            {
-                "id": 1,
-                "username": username,
-                "bio": "Utilisateur trouvé"
-            }
-        ])
+        if len(query) < 3:
+            self._pad_response_time(start_time, 0.1)
+            return Response({
+                'results': [],
+                'next_cursor': None
+            })
+        
+        users = User.objects.filter(
+            Q(username__icontains=query) | Q(display_name__icontains=query)
+        ).filter(
+            profile_visibility='public'
+        )[:10]
+        
+        serializer = UserPublicSerializer(users, many=True)
+        
+        self._pad_response_time(start_time, 0.1)
+        
+        return Response({
+            'results': serializer.data,
+            'next_cursor': None
+        })
+    
+    def _pad_response_time(self, start_time, target_time):
+        """Pad response time to prevent timing attacks."""
+        elapsed = time.time() - start_time
+        if elapsed < target_time:
+            time.sleep(target_time - elapsed)
+
+
+class UserBulkView(APIView):
+    """GET /api/v1/users/bulk?ids=uuid1,uuid2,uuid3"""
+    permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(
+        operation_description="Récupère les profils de plusieurs utilisateurs",
+        tags=["Users"],
+        manual_parameters=[
+            openapi.Parameter(
+                'ids',
+                openapi.IN_QUERY,
+                description="Liste d'UUIDs séparés par des virgules",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        responses={200: openapi.Response(description="Profils trouvés")}
+    )
+    def get(self, request):
+        ids_str = request.GET.get('ids', '')
+        if not ids_str:
+            return Response({'users': []})
+        
+        uuids = [u.strip() for u in ids_str.split(',') if u.strip()][:50]
+        
+        users = User.objects.filter(public_uuid__in=uuids)
+        
+        accessible_users = []
+        for user in users:
+            if user.profile_visibility == 'public':
+                accessible_users.append(user)
+            elif user.profile_visibility == 'followers':
+                if Follower.objects.filter(follower=request.user, following=user).exists():
+                    accessible_users.append(user)
+        
+        serializer = UserPublicSerializer(accessible_users, many=True)
+        return Response({'users': serializer.data})
+
+
+class UserDiscoverView(APIView):
+    """GET /api/v1/users/discover"""
+    permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(
+        operation_description="Découvrir des utilisateurs",
+        tags=["Users"],
+        responses={200: openapi.Response(description="Utilisateurs découverts")}
+    )
+    def get(self, request):
+        following_ids = Follower.objects.filter(
+            follower=request.user
+        ).values_list('following_id', flat=True)
+        
+        users = User.objects.filter(
+            profile_visibility='public'
+        ).exclude(
+            id__in=list(following_ids) + [request.user.id]
+        ).order_by('-created_at')[:20]
+        
+        serializer = UserPublicSerializer(users, many=True)
+        return Response(serializer.data)
+
+import time
+from django.db.models import Q
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from core.models import User, Follower, AuditLog
+from core.serializers import UserPublicSerializer
+from core.permissions import PrivacyGuard
+from .serializers import UserProfileSerializer, UserSettingsSerializer
+
+
+def get_client_ip(request):
+    """Extract client IP from request."""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0]
+    return request.META.get('REMOTE_ADDR')
+
+
+class UserMeView(APIView):
+    """GET/PATCH /api/v1/users/me"""
+    permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(
+        operation_description="Récupère les informations du profil connecté",
+        tags=["Users"],
+        responses={200: openapi.Response(description="Profil trouvé")}
+    )
+    def get(self, request):
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_description="Met à jour le profil connecté",
+        tags=["Users"],
+        request_body=UserProfileSerializer,
+        responses={200: openapi.Response(description="Profil mis à jour")}
+    )
+    def patch(self, request):
+        serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            
+            AuditLog.objects.create(
+                event_type='user.profile.update',
+                actor=request.user,
+                target_type='user',
+                target_id=request.user.id,
+                ip_address=get_client_ip(request)
+            )
+            
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserSettingsView(APIView):
+    """PATCH /api/v1/users/me/settings"""
+    permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(
+        operation_description="Met à jour les paramètres de l'utilisateur connecté",
+        tags=["Users"],
+        request_body=UserSettingsSerializer,
+        responses={200: openapi.Response(description="Paramètres mis à jour")}
+    )
+    def patch(self, request):
+        serializer = UserSettingsSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserDetailView(APIView):
+    """GET /api/v1/users/{id}"""
+    permission_classes = [IsAuthenticated, PrivacyGuard]
+    
+    @swagger_auto_schema(
+        operation_description="Affiche le profil public d'un utilisateur",
+        tags=["Users"],
+        responses={200: openapi.Response(description="Profil trouvé")}
+    )
+    def get(self, request, id):
+        user = User.objects.filter(public_uuid=id).first()
+        
+        if not user:
+            return Response(
+                {'error': 'Ressource non disponible'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if not PrivacyGuard().has_object_permission(request, self, user):
+            return Response(
+                {'error': 'Ressource non disponible'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = UserPublicSerializer(user)
+        return Response(serializer.data)
+
+
+class UserSearchView(APIView):
+    """GET /api/v1/users/search?username=..."""
+    permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(
+        operation_description="Recherche utilisateur par username",
+        tags=["Users"],
+        manual_parameters=[
+            openapi.Parameter(
+                'query',
+                openapi.IN_QUERY,
+                description="Terme de recherche (min 3 chars)",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        responses={200: openapi.Response(description="Résultats de recherche")}
+    )
+    def get(self, request):
+        start_time = time.time()
+        query = request.GET.get('query', '').strip()
+        
+        if len(query) < 3:
+            self._pad_response_time(start_time, 0.1)
+            return Response({
+                'results': [],
+                'next_cursor': None
+            })
+        
+        users = User.objects.filter(
+            Q(username__icontains=query) | Q(display_name__icontains=query)
+        ).filter(
+            profile_visibility='public'
+        )[:10]
+        
+        serializer = UserPublicSerializer(users, many=True)
+        
+        self._pad_response_time(start_time, 0.1)
+        
+        return Response({
+            'results': serializer.data,
+            'next_cursor': None
+        })
+    
+    def _pad_response_time(self, start_time, target_time):
+        """Pad response time to prevent timing attacks."""
+        elapsed = time.time() - start_time
+        if elapsed < target_time:
+            time.sleep(target_time - elapsed)
 
 
 class UserPostsView(APIView):
@@ -161,24 +385,19 @@ class UserPostsView(APIView):
         }
     )
     def get(self, request, id):
-        # TODO: Implémenter la récupération des posts
+        from core.models import Post
+        from posts.serializers import PostSerializer
         
-        return Response([
-            {
-                "id": 1,
-                "title": "Mon premier post",
-                "content": "Contenu du post",
-                "author_id": id,
-                "created_at": "2025-01-15T10:30:00Z"
-            },
-            {
-                "id": 2,
-                "title": "Deuxième post",
-                "content": "Autre contenu",
-                "author_id": id,
-                "created_at": "2025-01-16T14:20:00Z"
-            }
-        ])
+        user = get_object_or_404(User, public_uuid=id)
+        
+        # Récupérer les posts publics de l'utilisateur
+        posts = Post.objects.filter(
+            author=user,
+            visibility='public'
+        ).order_by('-created_at')[:20]
+        
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserDiscoverView(APIView):
@@ -191,21 +410,22 @@ class UserDiscoverView(APIView):
         }
     )
     def get(self, request):
-        # TODO: Implémenter la logique réelle de découverte
-        return Response([
-            {
-                "id": 10,
-                "username": "discover_alice",
-                "bio": "Bio d'Alice",
-                "joined_at": "2025-10-01T09:00:00Z"
-            },
-            {
-                "id": 11,
-                "username": "discover_bob",
-                "bio": "Bio de Bob",
-                "joined_at": "2025-10-02T10:00:00Z"
-            }
-        ], status=status.HTTP_200_OK)
+        from core.models import Follower
+        
+        # Découvrir des utilisateurs que l'utilisateur ne suit pas encore
+        following_ids = Follower.objects.filter(
+            follower=request.user
+        ).values_list('following_id', flat=True)
+        
+        # Exclure l'utilisateur actuel et ceux qu'il suit déjà
+        users = User.objects.exclude(
+            id__in=list(following_ids) + [request.user.id]
+        ).filter(
+            profile_visibility='public'
+        ).order_by('-created_at')[:20]
+        
+        serializer = UserPublicSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserSettingsView(APIView):
@@ -262,13 +482,10 @@ class UserBulkView(APIView):
         ids_str = request.GET.get('ids', '')
         if not ids_str:
             return Response({"error": "Paramètre 'ids' requis."}, status=status.HTTP_400_BAD_REQUEST)
-        ids = [int(i) for i in ids_str.split(',') if i.isdigit()]
-        # TODO: Récupérer les profils réels depuis la base de données
-        users = [
-            {
-                "id": i,
-                "username": f"utilisateur_{i}",
-                "bio": "Utilisateur actif de la plateforme"
-            } for i in ids
-        ]
-        return Response(users, status=status.HTTP_200_OK)
+        
+        # Récupérer les UUIDs
+        user_uuids = [uuid.strip() for uuid in ids_str.split(',')]
+        
+        users = User.objects.filter(public_uuid__in=user_uuids)
+        serializer = UserPublicSerializer(users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

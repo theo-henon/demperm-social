@@ -39,7 +39,16 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'rest_framework',
     'drf_yasg',
-
+    'core',
+    'authentication',
+    'users',
+    'posts',
+    'messaging',
+    'followers',
+    'forums',
+    'tags',
+    'comments',
+    'subscriptions',
 ]
 
 MIDDLEWARE = [
@@ -123,3 +132,35 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Custom User Model
+AUTH_USER_MODEL = 'core.User'
+
+# REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'core.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
+    'PAGE_SIZE': 20,
+    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
+}
+
+# Cache Configuration (Redis for rate limiting)
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'KEY_PREFIX': 'social',
+        'TIMEOUT': 3600,  # 1 hour default
+    }
+}
+
+# Content Integrity Secret (for HMAC signatures)
+CONTENT_INTEGRITY_SECRET = SECRET_KEY  # In production, use separate secret

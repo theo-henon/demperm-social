@@ -1,5 +1,7 @@
 # Demperm - Social
 
+Serveur social demperm
+
 ## Install developpement dependencies
 ```bash
 uv venv .venv

@@ -1,5 +1,14 @@
+"""URLs for Users app"""
 from django.urls import path
-from .views import UserMeView, UserDetailView, UserSearchView, UserDiscoverView, UserSettingsView, UserBulkView
+from .views import (
+    UserMeView,
+    UserSettingsView,
+    UserDetailView,
+    UserSearchView,
+    UserBulkView,
+    UserDiscoverView,
+    UserPostsView
+)
 
 urlpatterns = [
     path('me', UserMeView.as_view(), name='user-me'),
@@ -7,5 +16,6 @@ urlpatterns = [
     path('search', UserSearchView.as_view(), name='user-search'),
     path('bulk', UserBulkView.as_view(), name='user-bulk'),
     path('discover', UserDiscoverView.as_view(), name='user-discover'),
-    path('<uuid:id>', UserDetailView.as_view(), name='user-detail'),
+    path('<str:id>', UserDetailView.as_view(), name='user-detail'),
+    path('<str:id>/posts', UserPostsView.as_view(), name='user-posts'),
 ]

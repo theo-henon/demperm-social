@@ -1,10 +1,15 @@
-"""Messaging URLs"""
+"""URLs for Messaging app"""
 from django.urls import path
-from .views import ConversationsView, ConversationDetailView, MessageCreateView, ConversationDeleteView
+from .views import (
+    MessagesListView,
+    ConversationDetailView,
+    MessageCreateView,
+    ConversationDeleteView
+)
 
 urlpatterns = [
-    path('', ConversationsView.as_view(), name='conversations'),
-    path('<uuid:uuid>', ConversationDetailView.as_view(), name='conversation-detail'),
-    path('<uuid:uuid>/create', MessageCreateView.as_view(), name='message-create'),
-    path('<uuid:uuid>/delete', ConversationDeleteView.as_view(), name='conversation-delete'),
+    path('', MessagesListView.as_view(), name='messages-list'),
+    path('<str:id>', ConversationDetailView.as_view(), name='conversation-detail'),
+    path('<str:user_id>/create', MessageCreateView.as_view(), name='message-create'),
+    path('<str:id>/delete', ConversationDeleteView.as_view(), name='conversation-delete'),
 ]

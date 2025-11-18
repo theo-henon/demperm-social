@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: demperm-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: demperm_social
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - demperm-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: demperm-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - demperm-network
+
+  social-api:
+    build: .
+    container_name: demperm-social-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: demperm_social
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      DJANGO_SECRET_KEY: "django-insecure-change-this-in-production"
+      DEBUG: "True"
+    volumes:
+      - ./social_api:/app/social_api
+    networks:
+      - demperm-network
+    command: sh -c "python social_api/manage.py migrate && python social_api/manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  postgres_data:
+
+networks:
+  demperm-network:
+    driver: bridge

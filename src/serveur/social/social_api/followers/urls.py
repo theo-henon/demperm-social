@@ -1,20 +1,21 @@
+"""URLs for Followers app"""
 from django.urls import path
 from .views import (
-    FollowersListView,
-    FollowingListView,
-    FollowUserView,
-    UnfollowUserView,
+    FollowersMeView,
+    FollowingMeView,
     FollowerRequestsView,
-    AcceptFollowerRequestView,
-    RefuseFollowerRequestView,
+    FollowerRequestView,
+    FollowerAcceptView,
+    FollowerRefuseView,
+    UnfollowView
 )
 
 urlpatterns = [
-    path('followers/me', FollowersListView.as_view(), name='followers-list'),  # GET /api/v1/followers/me
-    path('following/me', FollowingListView.as_view(), name='following-list'),  # GET /api/v1/following/me
-    path('followers/<uuid:id>/follow', FollowUserView.as_view(), name='follow-user'),  # POST /api/v1/followers/:id/follow
-    path('followers/<uuid:id>/unfollow', UnfollowUserView.as_view(), name='unfollow-user'),  # DELETE /api/v1/followers/:id/unfollow
-    path('followers/requests', FollowerRequestsView.as_view(), name='follower-requests'),  # GET /api/v1/followers/requests
-    path('followers/requests/<uuid:id>/accept', AcceptFollowerRequestView.as_view(), name='follower-request-accept'),  # POST /api/v1/followers/requests/:id/accept
-    path('followers/requests/<uuid:id>/refuse', RefuseFollowerRequestView.as_view(), name='follower-request-refuse'),  # POST /api/v1/followers/requests/:id/refuse
+    path('followers/me', FollowersMeView.as_view(), name='followers-me'),
+    path('following/me', FollowingMeView.as_view(), name='following-me'),
+    path('followers/requests', FollowerRequestsView.as_view(), name='follower-requests'),
+    path('followers/<str:id>/request', FollowerRequestView.as_view(), name='follower-request'),
+    path('followers/<str:id>/accept', FollowerAcceptView.as_view(), name='follower-accept'),
+    path('followers/<str:id>/refuse', FollowerRefuseView.as_view(), name='follower-refuse'),
+    path('following/<str:id>/unfollow', UnfollowView.as_view(), name='unfollow'),
 ]

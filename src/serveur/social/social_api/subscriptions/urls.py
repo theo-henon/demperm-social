@@ -1,8 +1,10 @@
+"""URLs for Subscriptions app"""
 from django.urls import path
-from .views import SubscribeForumView, UnsubscribeForumView, MySubscriptionsView
+from .views import SubscribeForumView, UnsubscribeForumView, SubscribeSubforumView, UnsubscribeSubforumView
 
 urlpatterns = [
-    path('me', MySubscriptionsView.as_view(), name='subscriptions-me'),  # GET /api/v1/subscriptions/me
-    path('forums/<uuid:uuid>', SubscribeForumView.as_view(), name='subscribe-forum'),  # POST /api/v1/subscriptions/forums/:uuid
-    path('forums/<uuid:uuid>/unsubscribe', UnsubscribeForumView.as_view(), name='unsubscribe-forum'),  # DELETE /api/v1/subscriptions/forums/:uuid/unsubscribe
+    path('forums/<str:id>', SubscribeForumView.as_view(), name='subscribe-forum'),
+    path('forums/<str:id>/unsubscribe', UnsubscribeForumView.as_view(), name='unsubscribe-forum'),
+    path('subforums/<str:id>', SubscribeSubforumView.as_view(), name='subscribe-subforum'),
+    path('subforums/<str:id>/unsubscribe', UnsubscribeSubforumView.as_view(), name='unsubscribe-subforum'),
 ]

@@ -1,20 +1,28 @@
 [project]
 name = "demperm-social"
 version = "1.0.0"
-description = "Secure social network backend with JWT authentication"
+description = "Secure social network backend with JWT authentication and PostgreSQL"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "django==5.2.7",
-    "djangorestframework>=3.16.1",
+    "django>=5.0.0",
+    "djangorestframework>=3.14.0",
     "pyjwt>=2.8.0",
     "bleach>=6.1.0",
     "redis>=5.0.0",
     "django-redis>=5.4.0",
+    "psycopg2-binary>=2.9.0",
+    "drf-yasg>=1.21.7",
+    "pytz",
 ]
 
 [dependency-groups]
 dev = [
     "black>=25.9.0",
     "pytest>=8.4.2",
+    "pytest-django>=4.5.0",
 ]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

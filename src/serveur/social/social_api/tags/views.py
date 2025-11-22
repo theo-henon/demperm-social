@@ -7,7 +7,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from core.models import Tag, Post, PostTag
 from core.serializers import TagSerializer
-from core.permissions import IsModerator, IsOwner
+from core.permissions import IsOwner, IsAdmin
 
 class TagsListView(APIView):
     """GET /api/v1/tags/"""
@@ -21,7 +21,7 @@ class TagsListView(APIView):
 
 class TagCreateView(APIView):
     """POST /api/v1/tags/create"""
-    permission_classes = [IsAuthenticated, IsModerator]
+    permission_classes = [IsAuthenticated]
     
     @swagger_auto_schema(operation_description="Crée un nouveau tag", tags=["Tags"], request_body=TagSerializer)
     def post(self, request):
@@ -61,7 +61,7 @@ class TagUnassignView(APIView):
 
 class TagDeleteView(APIView):
     """DELETE /api/v1/tags/delete"""
-    permission_classes = [IsAuthenticated, IsModerator]
+    permission_classes = [IsAuthenticated, IsAdmin]
     
     @swagger_auto_schema(operation_description="Supprime un tag spécifique", tags=["Tags"])
     def delete(self, request):

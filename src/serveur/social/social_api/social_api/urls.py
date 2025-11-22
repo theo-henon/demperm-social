@@ -44,5 +44,10 @@ urlpatterns = [
     path("api/v1/tags/", include("tags.urls")),
     path("api/v1/subscriptions/", include("subscriptions.urls")),
     path("api/v1/domains/", include("domains.urls")),
+    path("api/v1/", include("comments.urls")),  # Comments endpoints
+    path("api/v1/", include("likes.urls")),  # Likes endpoints
+    path("api/v1/", include("blocks.urls")),  # Blocks endpoints
+    path("api/v1/", include("reports.urls")),  # Reports endpoints
+    path("api/v1/", include("admin_panel.urls")),  # Admin endpoints
     path('api/v1/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]

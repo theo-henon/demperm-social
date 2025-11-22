@@ -1,0 +1,10 @@
+"""
+Tags app configuration.
+"""
+from django.apps import AppConfig
+
+
+class TagsConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'api.apps.tags'
+    label = 'tags'

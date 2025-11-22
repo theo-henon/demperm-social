@@ -3,6 +3,7 @@ FROM python:3.11-slim
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONPATH=/app
 
 # Set work directory
 WORKDIR /app
@@ -17,13 +18,13 @@ RUN apt-get update && apt-get install -y \
 # Install Python dependencies
 COPY pyproject.toml ./
 RUN pip install --upgrade pip && \
-    pip install -e .
+    pip install django djangorestframework pyjwt bleach redis django-redis psycopg2-binary drf-yasg pytz
 
 # Copy project
-COPY social_api ./social_api
+COPY api ./api
 
 # Expose port
 EXPOSE 8000
 
 # Run migrations and start server
-CMD ["sh", "-c", "python social_api/manage.py migrate && python social_api/manage.py runserver 0.0.0.0:8000"]
+CMD ["sh", "-c", "python -m api.manage migrate && python -m api.manage runserver 0.0.0.0:8000"]

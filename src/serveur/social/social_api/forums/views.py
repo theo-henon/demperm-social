@@ -27,7 +27,7 @@ class ForumsListView(APIView):
 
 class ForumCreateView(APIView):
     """POST /api/v1/forums/create"""
-    permission_classes = [IsAuthenticated, IsAdmin]
+    permission_classes = [IsAuthenticated]
     
     @swagger_auto_schema(
         operation_description="Créer un forum",
@@ -80,7 +80,7 @@ class ForumSubforumsListView(APIView):
 
 class ForumSubforumCreateView(APIView):
     """POST /api/v1/forums/{id}/subforums/create"""
-    permission_classes = [IsAuthenticated, IsModerator]
+    permission_classes = [IsAuthenticated]
     
     @swagger_auto_schema(
         operation_description="Créer un sous-forum",

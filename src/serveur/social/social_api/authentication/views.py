@@ -16,10 +16,12 @@ from core.models import User, RefreshToken, AuditLog
 
 def generate_access_token(user):
     """Generate JWT access token (15 minutes validity)."""
+    import uuid
     payload = {
         'user_id': user.id,
         'username': user.username,
         'roles': user.roles or ['user'],
+        'jti': str(uuid.uuid4()),  # Unique token identifier
         'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15),
         'iat': datetime.datetime.utcnow(),
         'type': 'access'
@@ -29,10 +31,12 @@ def generate_access_token(user):
 
 def generate_refresh_token(user):
     """Generate and store refresh token (7 days validity)."""
+    import uuid
     expires_at = timezone.now() + datetime.timedelta(days=7)
     
     payload = {
         'user_id': user.id,
+        'jti': str(uuid.uuid4()),  # Unique token identifier
         'exp': expires_at,
         'iat': timezone.now(),
         'type': 'refresh'

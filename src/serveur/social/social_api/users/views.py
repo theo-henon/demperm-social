@@ -7,7 +7,7 @@ from django.db.models import Q
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from core.models import User, Follower, AuditLog, Post
@@ -292,3 +292,99 @@ class UserPostsView(APIView):
         
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
+
+
+class UserPublicKeyView(APIView):
+    """GET /api/v1/users/{user_id}/public_key - Get user's RSA public key for E2EE"""
+    permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(
+        operation_description="Récupère la clé publique RSA d'un utilisateur pour chiffrer des messages",
+        tags=["Users", "E2EE"],
+        responses={
+            200: openapi.Response(
+                description="Clé publique trouvée",
+                examples={
+                    "application/json": {
+                        "user_id": "uuid-here",
+                        "public_key_rsa": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A...",
+                        "key_format": "SPKI",
+                        "algorithm": "RSA-2048"
+                    }
+                }
+            ),
+            404: openapi.Response(description="Utilisateur ou clé non trouvée")
+        }
+    )
+    def get(self, request, id):
+        try:
+            user = User.objects.get(public_uuid=id)
+        except User.DoesNotExist:
+            return Response({'error': 'Utilisateur non trouvé'}, status=status.HTTP_404_NOT_FOUND)
+        
+        if not user.public_key_rsa:
+            return Response(
+                {'error': 'Cet utilisateur n\'a pas configuré de clé publique'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        return Response({
+            'user_id': str(user.public_uuid),
+            'username': user.username,
+            'public_key_rsa': user.public_key_rsa,
+            'key_format': 'SPKI',
+            'algorithm': 'RSA-2048'
+        })
+
+
+class UserPublicKeyUploadView(APIView):
+    """POST /api/v1/users/me/public_key - Upload user's RSA public key"""
+    permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(
+        operation_description="Envoie la clé publique RSA de l'utilisateur (générée côté client)",
+        tags=["Users", "E2EE"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['public_key_rsa'],
+            properties={
+                'public_key_rsa': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Clé publique RSA-2048 au format SPKI Base64"
+                )
+            }
+        ),
+        responses={
+            200: openapi.Response(description="Clé publique enregistrée"),
+            400: openapi.Response(description="Clé invalide")
+        }
+    )
+    def post(self, request):
+        public_key = request.data.get('public_key_rsa')
+        
+        if not public_key:
+            return Response({'error': 'public_key_rsa requis'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Basic validation: check if it looks like a Base64-encoded key
+        if len(public_key) < 300 or not public_key.isprintable():
+            return Response(
+                {'error': 'Format de clé publique invalide (attendu: Base64 SPKI)'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Store the public key
+        request.user.public_key_rsa = public_key
+        request.user.save(update_fields=['public_key_rsa'])
+        
+        # Log action
+        AuditLog.objects.create(
+            actor=request.user,
+            event_type='user.public_key.upload',
+            payload={'user_id': str(request.user.public_uuid)},
+            ip_address=get_client_ip(request)
+        )
+        
+        return Response({
+            'message': 'Clé publique enregistrée avec succès',
+            'user_id': str(request.user.public_uuid)
+        })

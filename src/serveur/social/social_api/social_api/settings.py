@@ -42,6 +42,11 @@ INSTALLED_APPS = [
     'tags',
     'subscriptions',
     'domains',
+    'comments',
+    'likes',
+    'blocks',
+    'reports',
+    'admin_panel',
 ]
 
 MIDDLEWARE = [

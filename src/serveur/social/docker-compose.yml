@@ -46,11 +46,11 @@ services:
       REDIS_PORT: 6379
       DJANGO_SECRET_KEY: "django-insecure-change-this-in-production"
       DEBUG: "True"
-    volumes:
-      - ./social_api:/app/social_api
+    # volumes:
+    #   - ./api:/app/api  # Uncomment for development hot-reload
     networks:
       - demperm-network
-    command: sh -c "python social_api/manage.py migrate && python social_api/manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python -m api.manage migrate && python -m api.manage runserver 0.0.0.0:8000"
 
 volumes:
   postgres_data:

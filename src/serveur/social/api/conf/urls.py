@@ -1,0 +1,49 @@
+"""
+URL configuration for demperm-social backend.
+"""
+from django.contrib import admin
+from django.urls import path, include
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+# Swagger/OpenAPI schema
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Demperm Social API",
+        default_version='v1',
+        description="API REST pour réseau social politique local",
+        terms_of_service="https://www.example.com/terms/",
+        contact=openapi.Contact(email="contact@example.com"),
+        license=openapi.License(name="MIT License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
+
+urlpatterns = [
+    # Django admin
+    path('admin/', admin.site.urls),
+    
+    # API v1
+    path('api/v1/auth/', include('apps.auth.urls')),
+    path('api/v1/users/', include('apps.users.urls')),
+    path('api/v1/domains/', include('apps.domains.urls')),
+    path('api/v1/forums/', include('apps.forums.urls')),
+    path('api/v1/subforums/', include('apps.subforums.urls')),
+    path('api/v1/subscriptions/', include('apps.subscriptions.urls')),
+    path('api/v1/posts/', include('apps.posts.urls')),
+    path('api/v1/comments/', include('apps.comments.urls')),
+    path('api/v1/likes/', include('apps.likes.urls')),
+    path('api/v1/followers/', include('apps.followers.urls')),
+    path('api/v1/following/', include('apps.followers.urls')),  # Alias
+    path('api/v1/tags/', include('apps.tags.urls')),
+    path('api/v1/messages/', include('apps.messages.urls')),
+    path('api/v1/reports/', include('apps.reports.urls')),
+    path('api/v1/admin/', include('apps.admin_panel.urls')),
+    
+    # API Documentation
+    path('api/v1/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('api/v1/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+]
+

@@ -19,4 +19,10 @@ class ReportSerializer(serializers.Serializer):
     status = serializers.CharField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
     resolved_at = serializers.DateTimeField(read_only=True, allow_null=True)
+    
+    class Meta:
+        # Explicit ref_name avoids collisions with other serializers that
+        # share the same class name in different modules when drf_yasg
+        # generates component $ref names.
+        ref_name = 'AdminReportSerializer'
 

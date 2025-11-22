@@ -138,10 +138,12 @@ REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', '')
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}',
-        'OPTIONS': {
-            'PASSWORD': REDIS_PASSWORD if REDIS_PASSWORD else None,
-        }
+        # If a password is configured, include it in the URL (redis://:password@host:port/db)
+        'LOCATION': (
+            f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+            if REDIS_PASSWORD else f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+        ),
+        'OPTIONS': {},
     }
 }
 
@@ -166,7 +168,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'MAX_PAGE_SIZE': 100,
-    'EXCEPTION_HANDLER': 'common.exceptions.custom_exception_handler',
+    # Use the custom exception handler in production, but when DEBUG is
+    # enabled prefer DRF's default handler so we get useful debug output
+    # while developing/debugging.
+    'EXCEPTION_HANDLER': (
+        'rest_framework.views.exception_handler' if DEBUG
+        else 'common.exceptions.custom_exception_handler'
+    ),
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',

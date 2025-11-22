@@ -22,3 +22,7 @@ class ReportSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(read_only=True)
     resolved_at = serializers.DateTimeField(read_only=True, allow_null=True)
 
+    class Meta:
+        # Unique ref_name to avoid collision with the admin_panel.ReportSerializer
+        ref_name = 'ReportsReportSerializer'
+

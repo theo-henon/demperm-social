@@ -25,6 +25,12 @@ class Domain(models.Model):
     def __str__(self):
         return self.domain_name
 
+    # Compatibility alias used by views/serializers in the API layer
+    @property
+    def name(self):
+        """Alias for domain_name to keep API layer consistent."""
+        return self.domain_name
+
 
 class Forum(models.Model):
     """User-created forums."""
@@ -96,6 +102,24 @@ class Subforum(models.Model):
     
     def __str__(self):
         return self.subforum_name
+
+    # Compatibility aliases used by views/serializers
+    @property
+    def name(self):
+        return self.subforum_name
+
+    @property
+    def parent_domain_id(self):
+        if self.parent_domain_id is not None:
+            # Django already provides <fk>_id, but ensure string or None
+            return str(self.parent_domain_id)
+        return None
+
+    @property
+    def parent_forum_id(self):
+        if self.parent_forum_id is not None:
+            return str(self.parent_forum_id)
+        return None
 
 
 class Membership(models.Model):

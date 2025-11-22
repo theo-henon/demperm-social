@@ -26,7 +26,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     # API v1
-    path('api/v1/auth/', include('apps.auth.urls')),
+    path('api/v1/auth/', include('apps.custom_auth.urls')),
     path('api/v1/users/', include('apps.users.urls')),
     path('api/v1/domains/', include('apps.domains.urls')),
     path('api/v1/forums/', include('apps.forums.urls')),
@@ -38,7 +38,7 @@ urlpatterns = [
     path('api/v1/followers/', include('apps.followers.urls')),
     path('api/v1/following/', include('apps.followers.urls')),  # Alias
     path('api/v1/tags/', include('apps.tags.urls')),
-    path('api/v1/messages/', include('apps.messages.urls')),
+    path('api/v1/messages/', include('apps.custom_messages.urls')),
     path('api/v1/reports/', include('apps.reports.urls')),
     path('api/v1/admin/', include('apps.admin_panel.urls')),
     

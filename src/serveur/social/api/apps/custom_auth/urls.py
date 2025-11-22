@@ -9,7 +9,7 @@ from .views import (
     LogoutView,
 )
 
-app_name = 'auth'
+app_name = 'custom_auth'
 
 urlpatterns = [
     path('google/url/', GoogleAuthURLView.as_view(), name='google-auth-url'),

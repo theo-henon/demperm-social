@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     
     # Local apps
     'db',
-    'apps.auth',
+    'apps.custom_auth',
     'apps.users',
     'apps.posts',
     'apps.comments',
@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'apps.subforums',
     'apps.subscriptions',
     'apps.tags',
-    'apps.messages',
+    'apps.custom_messages',
     'apps.reports',
     'apps.admin_panel',
 ]

@@ -27,6 +27,11 @@ class User(models.Model):
     is_banned = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     last_login_at = models.DateTimeField(null=True, blank=True)
+    # Minimal attributes expected when a model is used as AUTH_USER_MODEL
+    # These allow Django's auth checks to pass when this model is registered
+    # as the project's user model (AUTH_USER_MODEL = 'db.User').
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
     
     class Meta:
         db_table = 'users'

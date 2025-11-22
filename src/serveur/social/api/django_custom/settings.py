@@ -54,6 +54,11 @@ INSTALLED_APPS = [
     'apps.admin_panel',
 ]
 
+# NOTE: We do not set AUTH_USER_MODEL to the `db.User` model because
+# the project's `db.User` is not a full Django AbstractBaseUser-compatible
+# replacement. Instead we use a custom authentication class that resolves
+# JWT tokens to the project's user table via the repository layer.
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',

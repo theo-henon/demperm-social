@@ -9,7 +9,7 @@ from drf_yasg import openapi
 
 from services.apps_services.message_service import MessageService
 from common.permissions import IsAuthenticated, IsNotBanned
-from common.rate_limiters import rate_limit_message_create, rate_limit_general
+from common.rate_limiters import rate_limit_message_send, rate_limit_message_send
 from common.exceptions import NotFoundError, ValidationError
 from common.utils import get_client_ip
 from .serializers import SendMessageSerializer, MessageSerializer, ConversationSerializer
@@ -28,7 +28,7 @@ class ConversationsListView(APIView):
         ],
         responses={200: ConversationSerializer(many=True)}
     )
-    @rate_limit_general
+    @rate_limit_message_send
     def get(self, request):
         """Get conversations."""
         page = int(request.query_params.get('page', 1))
@@ -52,7 +52,7 @@ class ConversationView(APIView):
         ],
         responses={200: MessageSerializer(many=True)}
     )
-    @rate_limit_general
+    @rate_limit_message_send
     def get(self, request, user_id):
         """Get conversation."""
         page = int(request.query_params.get('page', 1))
@@ -82,7 +82,7 @@ class SendMessageView(APIView):
         request_body=SendMessageSerializer,
         responses={201: MessageSerializer}
     )
-    @rate_limit_message_create
+    @rate_limit_message_send
     def post(self, request, user_id):
         """Send message."""
         serializer = SendMessageSerializer(data=request.data)

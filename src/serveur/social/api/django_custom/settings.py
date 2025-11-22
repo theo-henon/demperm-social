@@ -203,6 +203,22 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
+# drf-yasg / Swagger UI configuration
+# Force Swagger to present a Bearer (JWT) auth input instead of default Basic/Session
+SWAGGER_SETTINGS = {
+    # Do not include Django session authentication (login button) in the docs UI
+    'USE_SESSION_AUTH': False,
+    # Define a Bearer (JWT) scheme in Swagger 2.0 (represented as apiKey in header)
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': 'JWT Authorization header using the Bearer scheme. Example: "Bearer <your_token>"',
+        }
+    },
+}
+
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = os.getenv(
     'DJANGO_CORS_ALLOWED_ORIGINS',

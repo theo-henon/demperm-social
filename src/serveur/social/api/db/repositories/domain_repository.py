@@ -161,3 +161,33 @@ class MembershipRepository:
         offset = (page - 1) * page_size
         return Membership.objects.filter(user_id=user_id).select_related('forum')[offset:offset + page_size]
 
+
+class SubforumSubscriptionRepository:
+    """Repository for subforum subscriptions."""
+
+    @staticmethod
+    def create(user_id: str, subforum_id: str):
+        """Create a subforum subscription."""
+        from db.entities.domain_entity import SubforumSubscription
+        return SubforumSubscription.objects.create(user_id=user_id, subforum_id=subforum_id)
+
+    @staticmethod
+    def delete(user_id: str, subforum_id: str) -> bool:
+        """Delete a subforum subscription."""
+        from db.entities.domain_entity import SubforumSubscription
+        deleted, _ = SubforumSubscription.objects.filter(user_id=user_id, subforum_id=subforum_id).delete()
+        return deleted > 0
+
+    @staticmethod
+    def exists(user_id: str, subforum_id: str) -> bool:
+        """Check if subscription exists."""
+        from db.entities.domain_entity import SubforumSubscription
+        return SubforumSubscription.objects.filter(user_id=user_id, subforum_id=subforum_id).exists()
+
+    @staticmethod
+    def get_user_subforums(user_id: str, page: int = 1, page_size: int = 20):
+        """Get subforums a user is subscribed to."""
+        from db.entities.domain_entity import SubforumSubscription
+        offset = (page - 1) * page_size
+        return SubforumSubscription.objects.filter(user_id=user_id).select_related('subforum')[offset:offset + page_size]
+

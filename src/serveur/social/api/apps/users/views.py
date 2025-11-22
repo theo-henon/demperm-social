@@ -72,7 +72,7 @@ class UpdateCurrentUserSettingsView(APIView):
     @swagger_auto_schema(
         operation_description="Update current user's settings",
         request_body=UpdateUserSettingsSerializer,
-        responses={200: UserSettingsSerializer}
+        responses={200: UpdateUserSettingsSerializer}
     )
     @rate_limit_general
     def patch(self, request):

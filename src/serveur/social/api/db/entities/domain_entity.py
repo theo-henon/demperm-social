@@ -123,3 +123,23 @@ class Membership(models.Model):
     def __str__(self):
         return f"{self.user.username} in {self.forum.forum_name}"
 
+
+class SubforumSubscription(models.Model):
+    """Subscriptions to subforums."""
+
+    subscription_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subforum_subscriptions')
+    subforum = models.ForeignKey(Subforum, on_delete=models.CASCADE, related_name='subscriptions')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'subforum_subscriptions'
+        unique_together = [['user', 'subforum']]
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['subforum']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} subscribed to {self.subforum.subforum_name}"
+

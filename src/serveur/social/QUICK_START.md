@@ -29,20 +29,48 @@ docker compose up -d
 
 # Vérifier que tout fonctionne
 docker compose logs -f api
+
+# Vérifier que le docker-entrypoint.sh est bien dans le format LF
 ```
 
-### 4. Initialiser la base de données
+### 4. Initialiser la base de données avec deux users
 
 ```bash
-# Les migrations et l'initialisation des domaines se font automatiquement
-# au démarrage du conteneur via docker-entrypoint.sh
+docker compose exec api python /app/api/manage.py shell
+from db.entities.user_entity import User, UserProfile, UserSettings
+from rest_framework_simplejwt.tokens import RefreshToken
 
-# Pour vérifier que les 9 domaines sont créés :
-docker-compose exec api python manage.py shell
->>> from db.entities.domain_entity import Domain
->>> Domain.objects.count()
-9
->>> exit()
+# Création utilisateur 1
+user1, created1 = User.objects.get_or_create(
+    email='alice@example.com',
+    defaults={'username': 'alice', 'google_id': 'google_alice'}
+)
+if created1:
+    UserProfile.objects.create(user=user1, display_name='Alice Dupont')
+    UserSettings.objects.create(user=user1)
+
+# Création utilisateur 2
+user2, created2 = User.objects.get_or_create(
+    email='bob@example.com',
+    defaults={'username': 'bob', 'google_id': 'google_bob'}
+)
+if created2:
+    UserProfile.objects.create(user=user2, display_name='Bob Martin')
+    UserSettings.objects.create(user=user2)
+
+# Génération des tokens
+token1 = str(RefreshToken.for_user(user1).access_token)
+token2 = str(RefreshToken.for_user(user2).access_token)
+
+print("\n" + "="*70)
+print("🔑 TOKEN ALICE (user1):")
+print("="*70)
+print(token1)
+print("\n" + "="*70)
+print("🔑 TOKEN BOB (user2):")
+print("="*70)
+print(token2)
+print("="*70)
 ```
 
 ### 5. Tester l'API
@@ -183,4 +211,9 @@ docker-compose up -d
 - **DRF Documentation** : https://www.django-rest-framework.org/
 - **Google OAuth2** : https://developers.google.com/identity/protocols/oauth2
 - **Specifications3.md** : Spécifications complètes du projet
+
+## Checked endpoints
+/domains/*
+/users/me
+/users/update
 

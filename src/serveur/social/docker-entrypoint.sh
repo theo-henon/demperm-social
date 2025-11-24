@@ -20,6 +20,8 @@ echo "✅ Redis is ready!"
 # Navigate to api directory
 cd /app/api
 
+mkdir -p logs
+
 # Run migrations
 echo "📦 Running database migrations..."
 python manage.py migrate --noinput
@@ -37,4 +39,3 @@ echo "🌐 Starting server..."
 
 # Execute the command passed to the container
 exec "$@"
-

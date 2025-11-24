@@ -73,7 +73,8 @@ class DomainService:
         
         # Create subforum
         subforum = SubforumRepository.create(
-            name=name,
+            creator_id=user_id,
+            subforum_name=name,
             description=description,
             parent_domain_id=domain_id,
             parent_forum_id=None

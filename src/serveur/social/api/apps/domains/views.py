@@ -127,7 +127,7 @@ class CreateDomainSubforumView(APIView):
             
             return Response({
                 'subforum_id': str(subforum.subforum_id),
-                'name': subforum.name,
+                'name': subforum.subforum_name,
                 'description': subforum.description,
                 'parent_domain_id': str(subforum.parent_domain_id),
                 'created_at': subforum.created_at

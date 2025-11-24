@@ -25,10 +25,10 @@ nano .env
 
 ```bash
 # Lancer tous les services (PostgreSQL, Redis, API)
-docker-compose up -d
+docker compose up -d
 
 # Vérifier que tout fonctionne
-docker-compose logs -f api
+docker compose logs -f api
 ```
 
 ### 4. Initialiser la base de données

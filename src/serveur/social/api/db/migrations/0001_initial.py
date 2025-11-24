@@ -90,7 +90,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('deleted_at', models.DateTimeField(auto_now_add=True)),
-                ('conversation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='deletions', to='core.conversation')),
+                ('conversation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='deletions', to='db.conversation')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -135,7 +135,7 @@ class Migration(migrations.Migration):
                 ('visibility', models.CharField(choices=[('public', 'Public'), ('private', 'Private')], default='public', max_length=20)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='created_forums', to=settings.AUTH_USER_MODEL)),
-                ('parent_forum', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='subforums', to='core.forum')),
+                ('parent_forum', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='subforums', to='db.forum')),
             ],
             options={
                 'db_table': 'forums',
@@ -146,7 +146,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('subscribed_at', models.DateTimeField(auto_now_add=True)),
-                ('forum', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='subscriptions', to='core.forum')),
+                ('forum', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='subscriptions', to='db.forum')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='forum_subscriptions', to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -161,7 +161,7 @@ class Migration(migrations.Migration):
                 ('content', models.TextField(max_length=2000)),
                 ('is_read', models.BooleanField(default=False)),
                 ('sent_at', models.DateTimeField(auto_now_add=True)),
-                ('conversation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='messages', to='core.conversation')),
+                ('conversation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='messages', to='db.conversation')),
                 ('sender', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sent_messages', to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -183,7 +183,7 @@ class Migration(migrations.Migration):
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='posts', to=settings.AUTH_USER_MODEL)),
                 ('deleted_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='deleted_posts', to=settings.AUTH_USER_MODEL)),
-                ('subforum', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='posts', to='core.forum')),
+                ('subforum', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='posts', to='db.forum')),
             ],
             options={
                 'db_table': 'posts',
@@ -220,8 +220,8 @@ class Migration(migrations.Migration):
             name='PostTag',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('post', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.post')),
-                ('tag', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.tag')),
+                ('post', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.post')),
+                ('tag', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='db.tag')),
             ],
             options={
                 'db_table': 'post_tags',
@@ -230,7 +230,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='post',
             name='tags',
-            field=models.ManyToManyField(related_name='posts', through='core.PostTag', to='core.tag'),
+            field=models.ManyToManyField(related_name='posts', through='db.PostTag', to='db.tag'),
         ),
         migrations.AddIndex(
             model_name='user',

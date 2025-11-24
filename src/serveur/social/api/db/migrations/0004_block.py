@@ -9,7 +9,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0003_like'),
+        ('db', '0003_like'),
     ]
 
     operations = [

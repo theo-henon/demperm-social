@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0007_add_user_public_key_rsa'),
+        ('db', '0007_add_user_public_key_rsa'),
     ]
 
     operations = [

@@ -14,6 +14,79 @@ class UserService:
     """Service for user management."""
     
     @staticmethod
+    @transaction.atomic
+    def create_user_from_firebase(firebase_uid: str, email: str, username: str, **kwargs) -> User:
+        """
+        Create a new user from Firebase authentication.
+        
+        Args:
+            firebase_uid: Firebase UID
+            email: User email
+            username: Username
+            **kwargs: Additional profile fields (display_name, profile_picture_url, etc.)
+            
+        Returns:
+            Created user instance
+            
+        Raises:
+            ConflictError: If username or email already exists
+            ValidationError: If data is invalid
+        """
+        # Validate username
+        username = Validator.validate_username(username)
+        
+        # Check if username already taken
+        existing_username = UserRepository.get_by_username(username)
+        if existing_username:
+            raise ConflictError("Username already taken")
+        
+        # Check if email already taken
+        existing_email = User.objects.filter(email=email).first()
+        if existing_email:
+            raise ConflictError("Email already registered")
+        
+        # Check if firebase_uid already exists
+        existing_firebase = User.objects.filter(firebase_uid=firebase_uid).first()
+        if existing_firebase:
+            raise ConflictError("Firebase user already registered")
+        
+        # Create user
+        user = User.objects.create(
+            firebase_uid=firebase_uid,
+            email=email,
+            username=username,
+            is_admin=False,
+            is_banned=False
+        )
+        
+        # Create profile
+        profile = UserProfile.objects.create(
+            user=user,
+            display_name=kwargs.get('display_name', username),
+            profile_picture_url=kwargs.get('profile_picture_url'),
+            bio=kwargs.get('bio', ''),
+            location=kwargs.get('location', ''),
+            privacy=kwargs.get('privacy', 'public')
+        )
+        
+        # Create settings
+        settings = UserSettings.objects.create(
+            user=user,
+            email_notifications=kwargs.get('email_notifications', True),
+            language=kwargs.get('language', 'fr')
+        )
+        
+        # Audit log
+        AuditLogRepository.create(
+            user_id=str(user.user_id),
+            action_type='user_created',
+            resource_type='user',
+            resource_id=str(user.user_id)
+        )
+        
+        return user
+    
+    @staticmethod
     def get_user_by_id(user_id: str) -> User:
         """
         Get user by ID.

@@ -73,3 +73,15 @@ class UserBulkSerializer(serializers.Serializer):
         max_length=100
     )
 
+
+class CreateUserSerializer(serializers.Serializer):
+    """Serializer for creating a user from Firebase authentication."""
+    username = serializers.CharField(max_length=30, required=True)
+    display_name = serializers.CharField(max_length=100, required=False)
+    profile_picture_url = serializers.URLField(required=False, allow_blank=True)
+    bio = serializers.CharField(max_length=500, required=False, allow_blank=True)
+    location = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    privacy = serializers.ChoiceField(choices=['public', 'private'], required=False, default='public')
+    email_notifications = serializers.BooleanField(required=False, default=True)
+    language = serializers.ChoiceField(choices=['fr', 'en'], required=False, default='fr')
+

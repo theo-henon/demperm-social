@@ -10,7 +10,7 @@ class User(models.Model):
     """Main user table."""
     
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    google_id = models.CharField(max_length=255, unique=True, db_index=True)
+    firebase_uid = models.CharField(max_length=255, unique=True, db_index=True)
     email = models.EmailField(max_length=255, unique=True, db_index=True)
     username = models.CharField(
         max_length=50,
@@ -37,7 +37,7 @@ class User(models.Model):
         db_table = 'users'
         indexes = [
             models.Index(fields=['email']),
-            models.Index(fields=['google_id']),
+            models.Index(fields=['firebase_uid']),
             models.Index(fields=['username']),
         ]
     

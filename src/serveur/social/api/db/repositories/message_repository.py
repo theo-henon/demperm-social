@@ -1,7 +1,7 @@
 """
 Message and Report repository for data access.
 """
-from typing import Optional, List
+from typing import Optional, List, Tuple
 from django.db.models import Q
 from db.entities.message_entity import Message, Report, AuditLog
 
@@ -89,13 +89,14 @@ class ReportRepository:
             return None
     
     @staticmethod
-    def get_all(status: Optional[str] = None, page: int = 1, page_size: int = 20) -> List[Report]:
-        """Get all reports, optionally filtered by status."""
+    def get_all(status: Optional[str] = None, page: int = 1, page_size: int = 20) -> Tuple[List[Report], int]:
+        """Get all reports, optionally filtered by status. Returns (reports, total_count)."""
         offset = (page - 1) * page_size
         query = Report.objects.select_related('reporter', 'resolved_by')
         if status:
             query = query.filter(status=status)
-        return query.order_by('-created_at')[offset:offset + page_size]
+        total = query.count()
+        return query.order_by('-created_at')[offset:offset + page_size], total
     
     @staticmethod
     def update_status(report_id: str, status: str, resolved_by_id: Optional[str] = None) -> Optional[Report]:

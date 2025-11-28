@@ -1,10 +1,5 @@
-"""
-Reuse shared test fixtures from the core API test suite and adapt them for admin endpoints.
-"""
+"""Admin panel test fixtures (inherits shared fixtures from api/tests/conftest)."""
 import pytest
-
-pytest_plugins = ["api.tests.conftest"]
-
 from db.entities.user_entity import User, UserProfile, UserSettings
 
 

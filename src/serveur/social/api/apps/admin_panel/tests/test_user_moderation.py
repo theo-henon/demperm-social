@@ -52,7 +52,7 @@ def test_unban_user_clears_flag(admin_client):
     target = _create_user("unban-target", is_banned=True)
     url = reverse("admin_panel:unban-user", args=[target.user_id])
 
-    response = admin_client.delete(url)
+    response = admin_client.post(url)
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     target.refresh_from_db()
@@ -63,7 +63,7 @@ def test_unban_user_clears_flag(admin_client):
 def test_unban_user_not_found_returns_404(admin_client):
     url = reverse("admin_panel:unban-user", args=[uuid.uuid4()])
 
-    response = admin_client.delete(url)
+    response = admin_client.post(url)
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
     body = response.json()
@@ -85,6 +85,6 @@ def test_unban_requires_admin(non_admin_client):
     target = _create_user("unban-target", is_banned=True)
     url = reverse("admin_panel:unban-user", args=[target.user_id])
 
-    response = non_admin_client.delete(url)
+    response = non_admin_client.post(url)
 
     assert response.status_code == status.HTTP_403_FORBIDDEN

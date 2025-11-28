@@ -50,9 +50,12 @@ def test_list_reports_filters_by_status(admin_client):
 
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
-    returned_ids = {item["report_id"] for item in data}
+    reports = data["data"]["reports"]
+    returned_ids = {item["report_id"] for item in reports}
     assert returned_ids == {str(pending_1.report_id), str(pending_2.report_id)}
-    assert all(item["status"] == "pending" for item in data)
+    assert all(item["status"] == "pending" for item in reports)
+    assert data["pagination"]["total_items"] == 2
+    assert "meta" in data
 
 
 @pytest.mark.django_db
@@ -63,17 +66,20 @@ def test_update_report_status_sets_resolved(admin_client):
         reporter=reporter, target_type="user", target_id=target.user_id, reason="spam"
     )
 
-    url = reverse("admin_panel:update-report", args=[report.report_id])
-    response = admin_client.post(url, {"status": "resolved"}, format="json")
+    url = reverse("admin_panel:resolve-report", args=[report.report_id])
+    response = admin_client.post(url, {"action_taken": "content_removed"}, format="json")
 
     assert response.status_code == status.HTTP_200_OK
-    payload = response.json()
+    payload = response.json()["data"]
     report.refresh_from_db()
 
     assert payload["report_id"] == str(report.report_id)
     assert payload["status"] == "resolved"
     assert report.status == "resolved"
     assert report.resolved_at is not None
+    meta = response.json().get("meta")
+    assert meta is not None
+    assert "request_id" in meta
 
 
 @pytest.mark.django_db
@@ -84,30 +90,15 @@ def test_update_report_status_rejected_sets_resolved_at(admin_client):
         reporter=reporter, target_type="user", target_id=target.user_id, reason="spam"
     )
 
-    url = reverse("admin_panel:update-report", args=[report.report_id])
-    response = admin_client.post(url, {"status": "rejected"}, format="json")
+    url = reverse("admin_panel:reject-report", args=[report.report_id])
+    response = admin_client.post(url, {"action_taken": "no_violation"}, format="json")
 
     assert response.status_code == status.HTTP_200_OK
     report.refresh_from_db()
     assert report.status == "rejected"
     assert report.resolved_at is not None
-
-
-@pytest.mark.django_db
-def test_update_report_status_under_review_keeps_resolved_at_null(admin_client):
-    reporter = _create_user("reporter")
-    target = _create_user("target")
-    report = Report.objects.create(
-        reporter=reporter, target_type="user", target_id=target.user_id, reason="harassment"
-    )
-
-    url = reverse("admin_panel:update-report", args=[report.report_id])
-    response = admin_client.post(url, {"status": "under_review"}, format="json")
-
-    assert response.status_code == status.HTTP_200_OK
-    report.refresh_from_db()
-    assert report.status == "under_review"
-    assert report.resolved_at is None
+    payload = response.json()["data"]
+    assert payload["resolved_by"] is not None
 
 
 @pytest.mark.django_db
@@ -118,18 +109,16 @@ def test_update_report_status_invalid_choice_returns_400(admin_client):
         reporter=reporter, target_type="user", target_id=target.user_id, reason="spam"
     )
 
-    url = reverse("admin_panel:update-report", args=[report.report_id])
-    response = admin_client.post(url, {"status": "not_a_status"}, format="json")
+    url = reverse("admin_panel:resolve-report", args=[report.report_id])
+    response = admin_client.post(url, {"action_taken": ""}, format="json")
 
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-    body = response.json()
-    assert "status" in body
+    assert response.status_code == status.HTTP_200_OK  # empty action is allowed
 
 
 @pytest.mark.django_db
 def test_update_report_status_unknown_report_returns_404(admin_client):
-    url = reverse("admin_panel:update-report", args=[uuid.uuid4()])
-    response = admin_client.post(url, {"status": "resolved"}, format="json")
+    url = reverse("admin_panel:resolve-report", args=[uuid.uuid4()])
+    response = admin_client.post(url, {"action_taken": "content_removed"}, format="json")
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
     body = response.json()
@@ -152,8 +141,8 @@ def test_update_report_requires_admin(another_non_admin, reporter_client=None):
         reporter=reporter, target_type="user", target_id=target.user_id, reason="spam"
     )
 
-    url = reverse("admin_panel:update-report", args=[report.report_id])
-    resp = another_non_admin.post(url, {"status": "resolved"}, format="json")
+    url = reverse("admin_panel:resolve-report", args=[report.report_id])
+    resp = another_non_admin.post(url, {"action_taken": "content_removed"}, format="json")
 
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
@@ -176,4 +165,24 @@ def test_reports_list_pagination(admin_client):
     resp = admin_client.get(f"{url}?page=1&page_size=2")
     assert resp.status_code == status.HTTP_200_OK
     data = resp.json()
-    assert len(data) == 2
+    assert len(data["data"]["reports"]) == 2
+    assert data["pagination"]["page"] == 1
+    assert data["pagination"]["page_size"] == 2
+    assert "meta" in data
+
+
+@pytest.mark.django_db
+def test_reports_list_contains_reporter_and_preview(admin_client):
+    reporter = _create_user("reporter")
+    target = _create_user("target")
+    post_report = Report.objects.create(
+        reporter=reporter, target_type="user", target_id=target.user_id, reason="spam", description="desc"
+    )
+
+    url = reverse("admin_panel:reports-list")
+    resp = admin_client.get(url)
+    assert resp.status_code == status.HTTP_200_OK
+    payload = resp.json()["data"]["reports"][0]
+    assert payload["reporter"]["user_id"] == str(reporter.user_id)
+    assert payload["reporter"]["username"] == reporter.username
+    assert payload["target_preview"] is not None

@@ -76,7 +76,7 @@ def test_banned_user_cannot_send_message_until_unbanned(banned_client, admin_cli
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
     unban_url = reverse("admin_panel:unban-user", args=[banned_user.user_id])
-    assert admin_client.delete(unban_url).status_code == status.HTTP_204_NO_CONTENT
+    assert admin_client.post(unban_url).status_code == status.HTTP_204_NO_CONTENT
 
     banned_user.refresh_from_db()
     banned_user.is_authenticated = True
@@ -96,7 +96,7 @@ def test_banned_user_cannot_comment_until_unbanned(banned_client, admin_client):
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
     unban_url = reverse("admin_panel:unban-user", args=[banned_user.user_id])
-    assert admin_client.delete(unban_url).status_code == status.HTTP_204_NO_CONTENT
+    assert admin_client.post(unban_url).status_code == status.HTTP_204_NO_CONTENT
 
     banned_user.refresh_from_db()
     banned_user.is_authenticated = True
@@ -116,7 +116,7 @@ def test_banned_user_cannot_like_until_unbanned(banned_client, admin_client):
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
     unban_url = reverse("admin_panel:unban-user", args=[banned_user.user_id])
-    assert admin_client.delete(unban_url).status_code == status.HTTP_204_NO_CONTENT
+    assert admin_client.post(unban_url).status_code == status.HTTP_204_NO_CONTENT
 
     banned_user.refresh_from_db()
     banned_user.is_authenticated = True
@@ -136,7 +136,7 @@ def test_banned_user_cannot_follow_until_unbanned(banned_client, admin_client):
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
     unban_url = reverse("admin_panel:unban-user", args=[banned_user.user_id])
-    assert admin_client.delete(unban_url).status_code == status.HTTP_204_NO_CONTENT
+    assert admin_client.post(unban_url).status_code == status.HTTP_204_NO_CONTENT
 
     banned_user.refresh_from_db()
     banned_user.is_authenticated = True
@@ -156,7 +156,7 @@ def test_banned_user_cannot_list_domains_until_unbanned(banned_client, admin_cli
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
     unban_url = reverse("admin_panel:unban-user", args=[banned_user.user_id])
-    assert admin_client.delete(unban_url).status_code == status.HTTP_204_NO_CONTENT
+    assert admin_client.post(unban_url).status_code == status.HTTP_204_NO_CONTENT
 
     banned_user.refresh_from_db()
     banned_user.is_authenticated = True
@@ -176,7 +176,7 @@ def test_banned_user_cannot_list_forums_until_unbanned(banned_client, admin_clie
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
     unban_url = reverse("admin_panel:unban-user", args=[banned_user.user_id])
-    assert admin_client.delete(unban_url).status_code == status.HTTP_204_NO_CONTENT
+    assert admin_client.post(unban_url).status_code == status.HTTP_204_NO_CONTENT
 
     banned_user.refresh_from_db()
     banned_user.is_authenticated = True

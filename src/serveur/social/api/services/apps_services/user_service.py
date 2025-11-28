@@ -20,10 +20,14 @@ class UserService:
         Create a new user from Firebase authentication.
         
         Args:
-            firebase_uid: Firebase UID
-            email: User email
-            username: Username
-            **kwargs: Additional profile fields (display_name, profile_picture_url, etc.)
+            firebase_uid: Firebase UID from JWT
+            email: User email from JWT
+            username: Username (required from frontend)
+            **kwargs: Additional fields:
+                - profile_picture: ImageField (blob) - optional
+                - bio: str - optional, default ''
+                - location: str - optional, default ''
+                - privacy: bool - optional, default True (public)
             
         Returns:
             Created user instance
@@ -59,21 +63,24 @@ class UserService:
             is_banned=False
         )
         
+        # Convert privacy boolean to string format for database
+        privacy_bool = kwargs.get('privacy', True)  # Default: True (public)
+        
         # Create profile
         profile = UserProfile.objects.create(
             user=user,
-            display_name=kwargs.get('display_name', username),
-            profile_picture_url=kwargs.get('profile_picture_url'),
+            display_name=username,  # Default display_name to username
+            profile_picture=kwargs.get('profile_picture'),  # ImageField (blob)
             bio=kwargs.get('bio', ''),
             location=kwargs.get('location', ''),
-            privacy=kwargs.get('privacy', 'public')
+            privacy=privacy_bool  # Store as boolean
         )
         
-        # Create settings
+        # Create settings with defaults
         settings = UserSettings.objects.create(
             user=user,
-            email_notifications=kwargs.get('email_notifications', True),
-            language=kwargs.get('language', 'fr')
+            email_notifications=True,  # Default to True
+            language='fr'  # Default to French
         )
         
         # Audit log
@@ -110,6 +117,13 @@ class UserService:
         """Get current user's full profile."""
         user = UserService.get_user_by_id(user_id)
         
+        # Get profile picture URL if exists
+        profile_picture_url = None
+        if user.profile.profile_picture:
+            profile_picture_url = user.profile.profile_picture.url
+        elif user.profile.profile_picture_url:  # Fallback to old URL field
+            profile_picture_url = user.profile.profile_picture_url
+        
         return {
             'user_id': str(user.user_id),
             'email': user.email,
@@ -120,10 +134,10 @@ class UserService:
             'last_login_at': user.last_login_at,
             'profile': {
                 'display_name': user.profile.display_name,
-                'profile_picture_url': user.profile.profile_picture_url,
+                'profile_picture_url': profile_picture_url,
                 'bio': user.profile.bio,
                 'location': user.profile.location,
-                'privacy': user.profile.privacy,
+                'privacy': 'public' if user.profile.privacy else 'private',  # Convert boolean to string
             },
             'settings': {
                 'email_notifications': user.settings.email_notifications,

@@ -4,6 +4,7 @@ Views for users app.
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -57,9 +58,10 @@ class CreateUserView(APIView):
     
     authentication_classes = [FirebaseAuthentication]
     permission_classes = []  # No permission required, just Firebase authentication
+    parser_classes = [MultiPartParser, FormParser, JSONParser]  # Support file upload
     
     @swagger_auto_schema(
-        operation_description="Create a new user account after Firebase authentication",
+        operation_description="Create a new user account after Firebase authentication. Supports multipart/form-data for profile picture upload.",
         request_body=CreateUserSerializer,
         responses={
             201: UserSerializer,
@@ -70,7 +72,11 @@ class CreateUserView(APIView):
     )
     @rate_limit_general
     def post(self, request):
-        """Create new user from Firebase auth."""
+        """Create new user from Firebase auth.
+        
+        Expected from JWT: firebase_uid, email
+        Expected from request body: username (required), profile_picture (blob), bio, location, privacy (boolean)
+        """
         # Check Firebase authentication
         if not hasattr(request, 'firebase_uid'):
             return Response(

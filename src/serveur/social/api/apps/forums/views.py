@@ -10,7 +10,7 @@ from drf_yasg import openapi
 from services.apps_services.forum_service import ForumService
 from common.permissions import IsAuthenticated, IsNotBanned
 from common.rate_limiters import rate_limit_general
-from common.exceptions import NotFoundError, ValidationError, ConflictError
+from common.exceptions import NotFoundError, ValidationError, ConflictError, PermissionDeniedError
 from common.utils import get_client_ip
 from .serializers import ForumSerializer, CreateForumSerializer
 from db.repositories.domain_repository import SubforumRepository
@@ -210,6 +210,11 @@ class LeaveForumView(APIView):
             return Response(
                 {'error': {'code': 'NOT_FOUND', 'message': str(e)}},
                 status=status.HTTP_404_NOT_FOUND
+            )
+        except PermissionDeniedError as e:
+            return Response(
+                {'error': {'code': getattr(e, 'code', 'PERMISSION_DENIED'), 'message': str(getattr(e, 'message', e))}},
+                status=getattr(e, 'status_code', status.HTTP_403_FORBIDDEN)
             )
 
 

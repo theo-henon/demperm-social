@@ -79,7 +79,7 @@ jobs:
         env:
           MAIN_REPO_OWNER: oricou
           MAIN_REPO_NAME: demperm
-          MAIN_REPO_DEFAULT_BRANCH: main
+          MAIN_REPO_DEFAULT_BRANCH: dev
           MAIN_REPO_TOKEN: ${{ secrets.UPSTREAM_TOKEN }}
         run: |
           set -e

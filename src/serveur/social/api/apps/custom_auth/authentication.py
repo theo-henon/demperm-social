@@ -94,8 +94,13 @@ class FirebaseAuthentication(BaseAuthentication):
                 return None
                 
         except firebase_auth.InvalidIdTokenError as exc:
+            print(f"Firebase InvalidIdTokenError: {exc}")
             raise exceptions.AuthenticationFailed('Invalid Firebase token') from exc
         except firebase_auth.ExpiredIdTokenError as exc:
+            print(f"Firebase ExpiredIdTokenError: {exc}")
             raise exceptions.AuthenticationFailed('Firebase token expired') from exc
         except Exception as exc:
+            print(f"Firebase authentication exception: {type(exc).__name__}: {exc}")
+            import traceback
+            traceback.print_exc()
             raise exceptions.AuthenticationFailed('Firebase authentication failed') from exc

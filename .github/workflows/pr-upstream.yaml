@@ -59,8 +59,8 @@ jobs:
 
           if git status --porcelain | grep -q .; then
             git add docs/serveur/social src/serveur/social .github/workflows
-            git config user.name "Suzor-Antonin-EPITA"
-            git config user.email "antonin.suzor@epita.fr"
+            git config user.name "MarcMage"
+            git config user.email "marc.mage@epita.fr"
             git commit -m "chore(social): sync ${GITHUB_REF_NAME}"
           else
             echo "Aucun changement → on arrête proprement."
@@ -79,7 +79,7 @@ jobs:
         env:
           MAIN_REPO_OWNER: oricou
           MAIN_REPO_NAME: demperm
-          MAIN_REPO_DEFAULT_BRANCH: dev
+          MAIN_REPO_DEFAULT_BRANCH: main
           MAIN_REPO_TOKEN: ${{ secrets.UPSTREAM_TOKEN }}
         run: |
           set -e

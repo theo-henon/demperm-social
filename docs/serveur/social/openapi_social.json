@@ -1,604 +1,1343 @@
 {
-  "openapi": "3.0.0",
+  "swagger": "2.0",
   "info": {
-    "title": "R\u00e9seau Social Politique API",
-    "version": "1.0.0",
-    "description": "Sp\u00e9cification OpenAPI compl\u00e8te sans vote-chain, avec forums, sous-forums, posts, tags, abonnements, utilisateurs, followers et messagerie."
+    "title": "Social API",
+    "description": "API du serveur social",
+    "version": "v1.0.0"
   },
+  "host": "127.0.0.1:8000",
+  "schemes": [
+    "http"
+  ],
+  "basePath": "/api/v1",
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "Basic": {
+      "type": "basic"
+    }
+  },
+  "security": [
+    {
+      "Basic": []
+    }
+  ],
   "paths": {
-    "/api/v1/users/me": {
+    "/domains/": {
       "get": {
-        "summary": "Profil connect\u00e9",
-        "tags": [
-          "Users"
-        ],
+        "operationId": "domains_list",
+        "description": "Liste des domaines",
+        "parameters": [],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Liste des domaines"
+          },
+          "401": {
+            "description": "Non authentifié"
           }
-        }
-      }
-    },
-    "/api/v1/users/{id}": {
-      "get": {
-        "summary": "Profil public",
+        },
         "tags": [
-          "Users"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
+          "Domains"
+        ]
+      },
+      "parameters": []
+    },
+    "/domains/{id}": {
+      "get": {
+        "operationId": "domains_read",
+        "description": "Détails d'un domaine",
+        "parameters": [],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Domaine trouvé"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Domaine non trouvé"
           }
-        }
-      }
-    },
-    "/api/v1/users/search": {
-      "get": {
-        "summary": "Recherche utilisateur par username",
+        },
         "tags": [
-          "Users"
-        ],
-        "parameters": [
-          {
-            "name": "username",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+          "Domains"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/domains/{id}/subforums": {
+      "get": {
+        "operationId": "domains_subforums_list",
+        "description": "Liste des sous-forums d'un domaine",
+        "parameters": [],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Liste des sous-forums"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Domaine non trouvé"
           }
-        }
-      }
-    },
-    "/api/v1/followers": {
-      "get": {
-        "summary": "Liste des followers",
+        },
         "tags": [
-          "Followers"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
+          "Domains"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
         }
-      }
+      ]
     },
-    "/api/v1/following": {
-      "get": {
-        "summary": "Liste des suivis",
-        "tags": [
-          "Followers"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/v1/follow/{id}": {
+    "/domains/{id}/subforums/create": {
       "post": {
-        "summary": "Suivre un utilisateur",
-        "tags": [
-          "Followers"
-        ],
+        "operationId": "domains_subforums_create_create",
+        "description": "Créer un sous-forum dans un domaine",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
+            "name": "data",
+            "in": "body",
+            "required": true,
             "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/v1/unfollow/{id}": {
-      "delete": {
-        "summary": "Se d\u00e9sabonner d\u2019un utilisateur",
-        "tags": [
-          "Followers"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/v1/messages/{id}/send": {
-      "post": {
-        "summary": "Envoyer un message priv\u00e9",
-        "tags": [
-          "Messages"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
+              "required": [
+                "name"
+              ],
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "Nom du sous-forum",
+                  "type": "string"
+                },
+                "description": {
+                  "description": "Description du sous-forum",
+                  "type": "string"
+                }
+              }
             }
           }
         ],
         "responses": {
           "201": {
-            "description": "Message envoy\u00e9"
+            "description": "Sous-forum créé"
+          },
+          "400": {
+            "description": "Données invalides"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Domaine non trouvé"
           }
-        }
-      }
-    },
-    "/api/v1/messages/{id}": {
-      "get": {
-        "summary": "Voir les messages \u00e9chang\u00e9s",
-        "tags": [
-          "Messages"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/v1/subscriptions/forums/{id}": {
-      "post": {
-        "summary": "S\u2019abonner \u00e0 un forum",
-        "tags": [
-          "Subscriptions"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/v1/subscriptions/forums/{id}/unsubscribe": {
-      "delete": {
-        "summary": "Se d\u00e9sabonner d\u2019un forum",
-        "tags": [
-          "Subscriptions"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/v1/subscriptions/subforums/{id}": {
-      "post": {
-        "summary": "S\u2019abonner \u00e0 un sous-forum",
-        "tags": [
-          "Subscriptions"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/v1/subscriptions/subforums/{id}/unsubscribe": {
-      "delete": {
-        "summary": "Se d\u00e9sabonner d\u2019un sous-forum",
-        "tags": [
-          "Subscriptions"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/v1/domains": {
-      "get": {
-        "summary": "Liste des domaines",
+        },
         "tags": [
           "Domains"
-        ],
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/followers/me": {
+      "get": {
+        "operationId": "followers_me_list",
+        "description": "Liste des followers",
+        "parameters": [],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Liste des followers"
+          },
+          "401": {
+            "description": "Non authentifié"
           }
-        }
-      }
-    },
-    "/api/v1/domains/{id}": {
-      "get": {
-        "summary": "D\u00e9tails d\u2019un domaine",
+        },
         "tags": [
-          "Domains"
-        ],
+          "Followers"
+        ]
+      },
+      "parameters": []
+    },
+    "/followers/requests": {
+      "get": {
+        "operationId": "followers_requests_list",
+        "description": "Récupère les demandes de followers en cours",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Demandes de followers"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        },
+        "tags": [
+          "Followers"
+        ]
+      },
+      "parameters": []
+    },
+    "/followers/{id}/accept": {
+      "post": {
+        "operationId": "followers_accept_create",
+        "description": "Accepte une demande de suivi",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Demande acceptée"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Demande non trouvée"
+          }
+        },
+        "tags": [
+          "Followers"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/followers/{id}/refuse": {
+      "post": {
+        "operationId": "followers_refuse_create",
+        "description": "Refuse une demande de suivi",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Demande refusée"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Demande non trouvée"
+          }
+        },
+        "tags": [
+          "Followers"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/followers/{id}/request": {
+      "post": {
+        "operationId": "followers_request_create",
+        "description": "Envoie une demande de suivi",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Demande envoyée"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Utilisateur non trouvé"
+          }
+        },
+        "tags": [
+          "Followers"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/following/me": {
+      "get": {
+        "operationId": "following_me_list",
+        "description": "Liste des suivis",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Liste des utilisateurs suivis"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        },
+        "tags": [
+          "Followers"
+        ]
+      },
+      "parameters": []
+    },
+    "/following/{id}/unfollow": {
+      "delete": {
+        "operationId": "following_unfollow_delete",
+        "description": "Se désabonner d'un utilisateur",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Désabonnement réussi"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Utilisateur non trouvé"
+          }
+        },
+        "tags": [
+          "Followers"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/forums/": {
+      "get": {
+        "operationId": "forums_list",
+        "description": "Liste des forums",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Liste des forums"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        },
+        "tags": [
+          "Forums"
+        ]
+      },
+      "parameters": []
+    },
+    "/forums/create": {
+      "post": {
+        "operationId": "forums_create_create",
+        "description": "Créer un forum",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
+            "name": "data",
+            "in": "body",
+            "required": true,
             "schema": {
-              "type": "integer"
+              "required": [
+                "name"
+              ],
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "Nom du forum",
+                  "type": "string"
+                },
+                "description": {
+                  "description": "Description du forum",
+                  "type": "string"
+                }
+              }
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/v1/forums": {
-      "get": {
-        "summary": "Liste des forums",
-        "tags": [
-          "Forums"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/v1/forums/create": {
-      "post": {
-        "summary": "Cr\u00e9er un forum",
-        "tags": [
-          "Forums"
         ],
         "responses": {
           "201": {
-            "description": "Forum cr\u00e9\u00e9"
+            "description": "Forum créé"
+          },
+          "400": {
+            "description": "Données invalides"
+          },
+          "401": {
+            "description": "Non authentifié"
           }
-        }
-      }
-    },
-    "/api/v1/forums/{id}": {
-      "get": {
-        "summary": "D\u00e9tails d\u2019un forum",
+        },
         "tags": [
           "Forums"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
+        ]
+      },
+      "parameters": []
+    },
+    "/forums/me": {
+      "get": {
+        "operationId": "forums_me_list",
+        "description": "Forums suivis par l'utilisateur",
+        "parameters": [],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Liste des forums suivis"
+          },
+          "401": {
+            "description": "Non authentifié"
           }
-        }
-      }
-    },
-    "/api/v1/forums/me": {
-      "get": {
-        "summary": "Forums suivis par l\u2019utilisateur",
+        },
         "tags": [
           "Forums"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
+        ]
+      },
+      "parameters": []
     },
-    "/api/v1/forums/search": {
+    "/forums/search": {
       "get": {
-        "summary": "Recherche de forums",
-        "tags": [
-          "Forums"
-        ],
+        "operationId": "forums_search_list",
+        "description": "Recherche de forums",
         "parameters": [
           {
             "name": "query",
             "in": "query",
-            "schema": {
-              "type": "string"
-            }
+            "description": "Terme de recherche",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Résultats de recherche"
+          },
+          "401": {
+            "description": "Non authentifié"
           }
-        }
-      }
+        },
+        "tags": [
+          "Forums"
+        ]
+      },
+      "parameters": []
     },
-    "/api/v1/forums/{id}/subforums": {
+    "/forums/{id}": {
       "get": {
-        "summary": "Liste des sous-forums",
-        "tags": [
-          "Forums"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
+        "operationId": "forums_read",
+        "description": "Détails d'un forum",
+        "parameters": [],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Forum trouvé"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Forum non trouvé"
           }
-        }
-      }
-    },
-    "/api/v1/forums/{id}/subforums/create": {
-      "post": {
-        "summary": "Cr\u00e9er un sous-forum",
+        },
         "tags": [
           "Forums"
-        ],
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/forums/{id}/subforums": {
+      "get": {
+        "operationId": "forums_subforums_list",
+        "description": "Liste des sous-forums",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Liste des sous-forums"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Forum non trouvé"
+          }
+        },
+        "tags": [
+          "Forums"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/forums/{id}/subforums/create": {
+      "post": {
+        "operationId": "forums_subforums_create_create",
+        "description": "Créer un sous-forum",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
+            "name": "data",
+            "in": "body",
+            "required": true,
             "schema": {
-              "type": "integer"
+              "required": [
+                "name"
+              ],
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "Nom du sous-forum",
+                  "type": "string"
+                },
+                "description": {
+                  "description": "Description du sous-forum",
+                  "type": "string"
+                }
+              }
             }
           }
         ],
         "responses": {
           "201": {
-            "description": "Sous-forum cr\u00e9\u00e9"
+            "description": "Sous-forum créé"
+          },
+          "400": {
+            "description": "Données invalides"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Forum non trouvé"
           }
-        }
-      }
-    },
-    "/api/v1/posts/create": {
-      "post": {
-        "summary": "Cr\u00e9er un post",
+        },
         "tags": [
-          "Posts"
-        ],
-        "responses": {
-          "201": {
-            "description": "Post cr\u00e9\u00e9"
-          }
+          "Forums"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
         }
-      }
+      ]
     },
-    "/api/v1/posts/{id}": {
+    "/messages/": {
       "get": {
-        "summary": "D\u00e9tails d\u2019un post",
-        "tags": [
-          "Posts"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
+        "operationId": "messages_list",
+        "description": "Lister les conversations de l'utilisateur",
+        "parameters": [],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Conversations trouvées"
+          },
+          "401": {
+            "description": "Non authentifié"
           }
-        }
-      }
-    },
-    "/api/v1/users/{id}/posts": {
-      "get": {
-        "summary": "Posts d\u2019un utilisateur",
+        },
         "tags": [
-          "Posts"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
+          "Messages"
+        ]
+      },
+      "parameters": []
+    },
+    "/messages/{id}": {
+      "get": {
+        "operationId": "messages_read",
+        "description": "Voir les messages échangés avec un utilisateur spécifique",
+        "parameters": [],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Messages trouvés"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Utilisateur non trouvé"
           }
+        },
+        "tags": [
+          "Messages"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
         }
-      }
+      ]
     },
-    "/api/v1/posts/{id}/delete": {
+    "/messages/{id}/delete": {
       "delete": {
-        "summary": "Supprimer un post",
-        "tags": [
-          "Posts"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
+        "operationId": "messages_delete_delete",
+        "description": "Supprimer une conversation avec un utilisateur spécifique",
+        "parameters": [],
         "responses": {
           "204": {
-            "description": "Supprim\u00e9"
+            "description": "Conversation supprimée"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Conversation non trouvée"
           }
-        }
-      }
-    },
-    "/api/v1/tags": {
-      "get": {
-        "summary": "Liste des tags",
+        },
         "tags": [
-          "Tags"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
+          "Messages"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
         }
-      }
+      ]
     },
-    "/api/v1/tags/create": {
+    "/messages/{user_id}/create": {
       "post": {
-        "summary": "Cr\u00e9er un tag",
-        "tags": [
-          "Tags"
-        ],
+        "operationId": "messages_create_create",
+        "description": "Créer une nouvelle conversation avec un utilisateur",
+        "parameters": [],
         "responses": {
           "201": {
-            "description": "Tag cr\u00e9\u00e9"
+            "description": "Conversation créée"
+          },
+          "400": {
+            "description": "Données invalides"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Utilisateur non trouvé"
           }
+        },
+        "tags": [
+          "Messages"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "user_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
         }
-      }
+      ]
     },
-    "/api/v1/tags/assign/{post_id}": {
+    "/posts/create": {
       "post": {
-        "summary": "Assigner des tags \u00e0 un post",
-        "tags": [
-          "Tags"
-        ],
+        "operationId": "posts_create_create",
+        "description": "Créer un post",
         "parameters": [
           {
-            "name": "post_id",
-            "in": "path",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Tags assign\u00e9s"
-          }
-        }
-      }
-    },
-    "/api/v1/domains/{id}/subforums": {
-      "get": {
-        "summary": "Liste des sous-forums d\u2019un domaine",
-        "tags": [
-          "Domains"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
+            "name": "data",
+            "in": "body",
             "required": true,
             "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/v1/domains/{id}/subforums/create": {
-      "post": {
-        "summary": "Cr\u00e9er un sous-forum dans un domaine",
-        "tags": [
-          "Domains"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
+              "required": [
+                "title",
+                "content"
+              ],
+              "type": "object",
+              "properties": {
+                "title": {
+                  "description": "Titre du post",
+                  "type": "string"
+                },
+                "content": {
+                  "description": "Contenu du post",
+                  "type": "string"
+                },
+                "subforum_id": {
+                  "description": "ID du sous-forum",
+                  "type": "integer"
+                }
+              }
             }
           }
         ],
         "responses": {
           "201": {
-            "description": "Sous-forum cr\u00e9\u00e9"
+            "description": "Post créé"
+          },
+          "400": {
+            "description": "Données invalides"
+          },
+          "401": {
+            "description": "Non authentifié"
           }
+        },
+        "tags": [
+          "Posts"
+        ]
+      },
+      "parameters": []
+    },
+    "/posts/discover": {
+      "get": {
+        "operationId": "posts_discover_list",
+        "description": "Découvrir des posts (découverte)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Posts découverts"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        },
+        "tags": [
+          "Posts"
+        ]
+      },
+      "parameters": []
+    },
+    "/posts/feed": {
+      "get": {
+        "operationId": "posts_feed_list",
+        "description": "Récupère le fil d'actualité (feed) des posts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Feed récupéré"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        },
+        "tags": [
+          "Posts"
+        ]
+      },
+      "parameters": []
+    },
+    "/posts/{id}": {
+      "get": {
+        "operationId": "posts_read",
+        "description": "Détails d'un post",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Post trouvé"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Post non trouvé"
+          }
+        },
+        "tags": [
+          "Posts"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
         }
-      }
+      ]
+    },
+    "/posts/{id}/delete": {
+      "delete": {
+        "operationId": "posts_delete_delete",
+        "description": "Supprimer un post",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Post supprimé"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "403": {
+            "description": "Accès interdit"
+          },
+          "404": {
+            "description": "Post non trouvé"
+          }
+        },
+        "tags": [
+          "Posts"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/subscriptions/forums/{id}": {
+      "post": {
+        "operationId": "subscriptions_forums_create",
+        "description": "S'abonner à un forum",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Abonnement réussi"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Forum non trouvé"
+          }
+        },
+        "tags": [
+          "Subscriptions"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/subscriptions/forums/{id}/unsubscribe": {
+      "delete": {
+        "operationId": "subscriptions_forums_unsubscribe_delete",
+        "description": "Se désabonner d'un forum",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Désabonnement réussi"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Forum non trouvé"
+          }
+        },
+        "tags": [
+          "Subscriptions"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/subscriptions/subforums/{id}": {
+      "post": {
+        "operationId": "subscriptions_subforums_create",
+        "description": "S'abonner à un sous-forum",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Abonnement au sous-forum réussi"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Sous-forum non trouvé"
+          }
+        },
+        "tags": [
+          "Subscriptions"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/subscriptions/subforums/{id}/unsubscribe": {
+      "delete": {
+        "operationId": "subscriptions_subforums_unsubscribe_delete",
+        "description": "Se désabonner d'un sous-forum",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Désabonnement du topic réussi"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Sous-forum non trouvé"
+          }
+        },
+        "tags": [
+          "Subscriptions"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/tags/": {
+      "get": {
+        "operationId": "tags_list",
+        "description": "Liste tous les tags disponibles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Liste des tags"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        },
+        "tags": [
+          "Tags"
+        ]
+      },
+      "parameters": []
+    },
+    "/tags/assign/{post_id}": {
+      "post": {
+        "operationId": "tags_assign_create",
+        "description": "Assigner des tags à un post",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "required": [
+                "tags"
+              ],
+              "type": "object",
+              "properties": {
+                "tags": {
+                  "description": "Liste des tags à associer",
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tags assignés au post"
+          },
+          "400": {
+            "description": "Requête invalide"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Post ou tag non trouvé"
+          }
+        },
+        "tags": [
+          "Tags"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "post_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/tags/create": {
+      "post": {
+        "operationId": "tags_create_create",
+        "description": "Crée un nouveau tag",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Tag créé"
+          },
+          "400": {
+            "description": "Données invalides"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        },
+        "tags": [
+          "Tags"
+        ]
+      },
+      "parameters": []
+    },
+    "/tags/delete": {
+      "delete": {
+        "operationId": "tags_delete_delete",
+        "description": "Supprime un tag spécifique",
+        "parameters": [
+          {
+            "name": "tag_id",
+            "in": "query",
+            "description": "ID du tag à supprimer",
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tag supprimé"
+          },
+          "400": {
+            "description": "Requête invalide"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Tag non trouvé"
+          }
+        },
+        "tags": [
+          "Tags"
+        ]
+      },
+      "parameters": []
+    },
+    "/tags/unassign/{post_id}": {
+      "post": {
+        "operationId": "tags_unassign_create",
+        "description": "Désassigner des tags d'un post",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "required": [
+                "tags"
+              ],
+              "type": "object",
+              "properties": {
+                "tags": {
+                  "description": "Liste des tags à désassocier",
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tags désassignés du post"
+          },
+          "400": {
+            "description": "Requête invalide"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Post ou tag non trouvé"
+          }
+        },
+        "tags": [
+          "Tags"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "post_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/users/bulk": {
+      "get": {
+        "operationId": "users_bulk_list",
+        "description": "Récupère les profils de plusieurs utilisateurs en une seule requête",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "description": "Liste d'IDs d'utilisateurs séparés par des virgules (ex: 1,2,3)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profils trouvés"
+          },
+          "400": {
+            "description": "Requête invalide"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "parameters": []
+    },
+    "/users/discover": {
+      "get": {
+        "operationId": "users_discover_list",
+        "description": "Découvrir des utilisateurs (découverte)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Utilisateurs découverts"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "parameters": []
+    },
+    "/users/me": {
+      "get": {
+        "operationId": "users_me_list",
+        "description": "Récupère les informations du profil connecté",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profil trouvé"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Utilisateur non trouvé"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "patch": {
+        "operationId": "users_me_partial_update",
+        "description": "Met à jour le profil connecté",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string"
+                },
+                "bio": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profil mis à jour"
+          },
+          "400": {
+            "description": "Requête invalide"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "parameters": []
+    },
+    "/users/me/settings": {
+      "patch": {
+        "operationId": "users_me_settings_partial_update",
+        "description": "Met à jour les paramètres de l'utilisateur connecté",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email_notifications": {
+                  "type": "boolean"
+                },
+                "privacy": {
+                  "type": "string"
+                },
+                "language": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paramètres mis à jour"
+          },
+          "400": {
+            "description": "Requête invalide"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "parameters": []
+    },
+    "/users/search": {
+      "get": {
+        "operationId": "users_search_list",
+        "description": "Recherche utilisateur par username",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "description": "Nom d'utilisateur à rechercher",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Résultats de recherche"
+          },
+          "401": {
+            "description": "Non authentifié"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "parameters": []
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "users_read",
+        "description": "Affiche le profil public d’un utilisateur",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profil trouvé"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Utilisateur non trouvé"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
+    },
+    "/users/{id}/posts": {
+      "get": {
+        "operationId": "users_posts_list",
+        "description": "Posts d'un utilisateur",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Liste des posts"
+          },
+          "401": {
+            "description": "Non authentifié"
+          },
+          "404": {
+            "description": "Utilisateur non trouvé"
+          }
+        },
+        "tags": [
+          "Posts"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ]
     }
-  }
+  },
+  "definitions": {}
 }

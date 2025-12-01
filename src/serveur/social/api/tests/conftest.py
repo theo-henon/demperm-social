@@ -18,17 +18,12 @@ def api_client():
 def test_user(db):
     """Create a test user."""
     user = User.objects.create(
-        google_id='test-google-id',
+        firebase_uid='test-firebase-uid',
         email='test@example.com',
         username='testuser'
     )
     UserProfile.objects.create(user=user, display_name='Test User')
     UserSettings.objects.create(user=user)
-    # ensure the test user behaves like an authenticated Django user
-    # DRF permission checks call `request.user.is_authenticated`.
-    # our custom User model doesn't provide the property on the instance,
-    # so set it here for tests.
-    user.is_authenticated = True
     return user
 
 
@@ -36,32 +31,28 @@ def test_user(db):
 def admin_user(db):
     """Create an admin user."""
     user = User.objects.create(
-        google_id='admin-google-id',
+        firebase_uid='admin-firebase-uid',
         email='admin@example.com',
         username='adminuser',
         is_admin=True
     )
     UserProfile.objects.create(user=user, display_name='Admin User')
     UserSettings.objects.create(user=user)
-    user.is_authenticated = True
     return user
 
 
 @pytest.fixture
 def authenticated_client(api_client, test_user):
     """Return authenticated API client."""
-    # Use a fresh APIClient instance to avoid sharing state between fixtures
-    client = APIClient()
-    client.force_authenticate(user=test_user)
-    return client
+    api_client.force_authenticate(user=test_user)
+    return api_client
 
 
 @pytest.fixture
 def admin_client(api_client, admin_user):
     """Return authenticated admin API client."""
-    client = APIClient()
-    client.force_authenticate(user=admin_user)
-    return client
+    api_client.force_authenticate(user=admin_user)
+    return api_client
 
 
 @pytest.fixture
@@ -79,4 +70,3 @@ def domains(db):
 def enable_db_access_for_all_tests(db):
     """Enable database access for all tests."""
     pass
-

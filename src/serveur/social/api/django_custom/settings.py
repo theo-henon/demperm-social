@@ -168,10 +168,7 @@ REST_FRAMEWORK = {
     'MAX_PAGE_SIZE': 100,
     # Use the custom exception handler in production, but when DEBUG is
     # enabled prefer DRF's default handler so we get useful debug output
-    # while developing/debugging.
-    'EXCEPTION_HANDLER': (
-        'rest_framework.views.exception_handler' if DEBUG
-        else 'common.exceptions.custom_exception_handler'
+    'EXCEPTION_HANDLER': 'common.exceptions.custom_exception_handler'
     ),
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
@@ -292,4 +289,3 @@ MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY', 'minioadmin')
 MINIO_SECRET_KEY = os.getenv('MINIO_SECRET_KEY', 'minioadmin')
 MINIO_BUCKET = os.getenv('MINIO_BUCKET', 'social-media')
 MINIO_USE_SSL = os.getenv('MINIO_USE_SSL', 'False') == 'True'
-

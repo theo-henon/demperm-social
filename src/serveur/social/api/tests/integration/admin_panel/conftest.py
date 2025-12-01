@@ -1,5 +1,6 @@
 """Admin panel test fixtures (inherits shared fixtures from api/tests/conftest)."""
 import pytest
+from rest_framework.test import APIClient
 from db.entities.user_entity import User, UserProfile, UserSettings
 
 
@@ -37,9 +38,11 @@ def banned_client(api_client):
     UserProfile.objects.create(user=user, display_name="banned user")
     UserSettings.objects.create(user=user)
 
+    # Use an isolated client to avoid auth being overwritten by other fixtures (e.g., admin_client).
+    client = APIClient()
     user.is_authenticated = True
-    api_client.force_authenticate(user=user)
-    return api_client, user
+    client.force_authenticate(user=user)
+    return client, user
 
 
 @pytest.fixture

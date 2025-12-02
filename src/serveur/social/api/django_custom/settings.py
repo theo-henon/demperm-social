@@ -64,9 +64,11 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'common.middleware.logging.RequestLoggingMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'conf.urls'
 
@@ -250,30 +252,50 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
+            'format': '%(levelname)s %(asctime)s [user_id=%(user_id)s username=%(username)s ip=%(ip)s] %(message)s',
         },
+    },
+    'filters': {
+        'user_context_filter': {
+            '()': 'common.middleware.logging.UserContextFilter',
+        }
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
+            'filters': ['user_context_filter'],
         },
         'file': {
             'class': 'logging.FileHandler',
             'filename': BASE_DIR / 'logs' / 'django.log',
             'formatter': 'verbose',
+            'filters': ['user_context_filter'],
         },
     },
     'root': {
         'handlers': ['console'],
         'level': os.getenv('LOG_LEVEL', 'INFO'),
+        'filters': ['user_context_filter'],
     },
     'loggers': {
         'django': {
             'handlers': ['console', 'file'],
             'level': os.getenv('LOG_LEVEL', 'INFO'),
             'propagate': False,
+            'filters': ['user_context_filter'],
+        },
+        'django.request': {
+            'handlers': ['console', 'file'],
+            'level': 'CRITICAL',
+            'propagate': False,
+            'filters': ['user_context_filter'],
+        },
+        'common.middleware.logging': {
+            'handlers': ['console', 'file'],
+            'level': os.getenv('LOG_LEVEL', 'INFO'),
+            'propagate': False,
+            'filters': ['user_context_filter'],
         },
     },
 }

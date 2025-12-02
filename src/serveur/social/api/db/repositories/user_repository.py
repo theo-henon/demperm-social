@@ -62,7 +62,7 @@ class UserRepository:
         return user
     
     @staticmethod
-    def search_by_username(query: str, limit: int = 20) -> List[User]:
+    def search_by_username(query: str, page: int = 1, limit: int = 20) -> List[User]:
         """Search users by username (case-insensitive)."""
         return User.objects.filter(
             username__icontains=query,

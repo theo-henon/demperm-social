@@ -15,17 +15,17 @@ def users(db):
     user1 = User.objects.create(
         email='user1@test.com',
         username='user1',
-        google_id='google_1'
+        firebase_uid='google_1'
     )
     user2 = User.objects.create(
         email='user2@test.com',
         username='user2',
-        google_id='google_2'
+        firebase_uid='google_2'
     )
     user3 = User.objects.create(
         email='user3@test.com',
         username='user3',
-        google_id='google_3'
+        firebase_uid='google_3'
     )
     return {'user1': user1, 'user2': user2, 'user3': user3}
 

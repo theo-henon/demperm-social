@@ -30,7 +30,7 @@ def banned_client(api_client):
     Authenticated client for a banned user.
     """
     user = User.objects.create(
-        google_id="banned-google",
+        firebase_uid="banned-google",
         email="banned@example.com",
         username="banned_user",
         is_banned=True,
@@ -51,7 +51,7 @@ def another_non_admin(api_client):
     A separate non-admin user for permission tests.
     """
     user = User.objects.create(
-        google_id="nonadmin-google",
+        firebase_uid="nonadmin-google",
         email="nonadmin@example.com",
         username="nonadmin_user",
         is_admin=False,

@@ -31,7 +31,7 @@ if not hasattr(Follow, "followed_id"):
 
 def _create_user(prefix: str) -> User:
     user = User.objects.create(
-        google_id=f"{prefix}-google",
+        firebase_uid=f"{prefix}-google",
         email=f"{prefix}@example.com",
         username=prefix,
     )

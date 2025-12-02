@@ -7,7 +7,7 @@ from db.entities.user_entity import User
 
 @pytest.mark.django_db
 def test_forum_name_alias_and_defaults():
-    user = User.objects.create(google_id='g-test', email='u-test@example.com', username='u_test')
+    user = User.objects.create(firebase_uid='g-test', email='u-test@example.com', username='u_test')
     f = Forum.objects.create(creator=user, forum_name='MyForum', description='A forum')
 
     # alias returns the same value

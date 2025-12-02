@@ -14,7 +14,7 @@ def _create_user(email_prefix: str = "user", is_banned: bool = False) -> User:
     """Helper to create a user with profile/settings."""
     suffix = uuid.uuid4()
     user = User.objects.create(
-        google_id=f"{email_prefix}-google-{suffix}",
+        firebase_uid=f"{email_prefix}-google-{suffix}",
         email=f"{email_prefix}-{suffix}@example.com",
         username=f"{email_prefix}_{suffix}",
         is_banned=is_banned,

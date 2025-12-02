@@ -16,7 +16,7 @@ def _mk_user(prefix: str = "user", is_admin: bool = False, banned: bool = False)
     """Create a user with profile/settings."""
     uid = uuid.uuid4()
     user = User.objects.create(
-        google_id=f"{prefix}-google-{uid}",
+        firebase_uid=f"{prefix}-google-{uid}",
         email=f"{prefix}-{uid}@example.com",
         username=f"{prefix}_{uid}",
         is_admin=is_admin,

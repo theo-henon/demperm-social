@@ -22,7 +22,7 @@ def user1(db):
     user = User.objects.create(
         email='user1@test.com',
         username='user1',
-        google_id='google_id_1'
+        firebase_uid='firebase_id_1'
     )
     # Generate RSA keys for E2E encryption (simplified for tests)
     user.public_key_rsa = "-----BEGIN PUBLIC KEY-----\nMOCK_PUBLIC_KEY\n-----END PUBLIC KEY-----"
@@ -39,7 +39,7 @@ def user2(db):
     user = User.objects.create(
         email='user2@test.com',
         username='user2',
-        google_id='google_id_2'
+        firebase_uid='firebase_id_2'
     )
     user.public_key_rsa = "-----BEGIN PUBLIC KEY-----\nMOCK_PUBLIC_KEY\n-----END PUBLIC KEY-----"
     user.save()

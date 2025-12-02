@@ -11,7 +11,7 @@ from common.exceptions import PermissionDeniedError
 @pytest.mark.django_db
 def test_create_forum_auto_joins_and_counts():
     # creator should be auto-joined as moderator and member_count incremented
-    user = User.objects.create(google_id='g1', email='c1@example.com', username='creator1')
+    user = User.objects.create(firebase_uid='g1', email='c1@example.com', username='creator1')
     forum = ForumService.create_forum(str(user.user_id), 'My Forum', 'desc')
 
     assert forum.forum_name == 'My Forum'
@@ -34,10 +34,10 @@ def test_get_forum_by_id_not_found():
 
 @pytest.mark.django_db
 def test_join_forum_success_and_conflict():
-    creator = User.objects.create(google_id='g2', email='c2@example.com', username='creator2')
+    creator = User.objects.create(firebase_uid='g2', email='c2@example.com', username='creator2')
     forum = ForumService.create_forum(str(creator.user_id), 'Joinable Forum', 'd')
 
-    user = User.objects.create(google_id='g3', email='u3@example.com', username='user3')
+    user = User.objects.create(firebase_uid='g3', email='u3@example.com', username='user3')
 
     # user joins successfully
     membership = ForumService.join_forum(str(user.user_id), str(forum.forum_id))
@@ -51,10 +51,10 @@ def test_join_forum_success_and_conflict():
 
 @pytest.mark.django_db
 def test_leave_forum_not_member_and_creator_cannot_leave():
-    creator = User.objects.create(google_id='g4', email='c4@example.com', username='creator4')
+    creator = User.objects.create(firebase_uid='g4', email='c4@example.com', username='creator4')
     forum = ForumService.create_forum(str(creator.user_id), 'LeaveForum', 'd')
 
-    other = User.objects.create(google_id='g5', email='o5@example.com', username='other5')
+    other = User.objects.create(firebase_uid='g5', email='o5@example.com', username='other5')
 
     # other trying to leave (not a member) should raise NotFoundError
     with pytest.raises(NotFoundError):
@@ -67,8 +67,8 @@ def test_leave_forum_not_member_and_creator_cannot_leave():
 
 @pytest.mark.django_db
 def test_join_forum_conflict():
-    user = User.objects.create(google_id='g6', email='c6@example.com', username='conflict_user')
-    creator = User.objects.create(google_id='g7', email='f7@example.com', username='forum_owner')
+    user = User.objects.create(firebase_uid='g6', email='c6@example.com', username='conflict_user')
+    creator = User.objects.create(firebase_uid='g7', email='f7@example.com', username='forum_owner')
     forum = ForumService.create_forum(str(creator.user_id), 'ConflictForum', 'd')
 
     # first join succeeds

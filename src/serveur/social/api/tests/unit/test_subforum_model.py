@@ -7,7 +7,7 @@ from django.db import IntegrityError
 @pytest.mark.django_db
 def test_subforum_must_have_exactly_one_parent():
     # create ORM objects directly instead of relying on factory fixtures
-    user = User.objects.create(google_id='g-f', email='u-f@example.com', username='u_forum')
+    user = User.objects.create(firebase_uid='g-f', email='u-f@example.com', username='u_forum')
     domain = Domain.objects.create(domain_name='TestDomain', description='d')
     forum = Forum.objects.create(creator=user, forum_name='TestForum', description='d')
 
@@ -23,9 +23,9 @@ def test_subforum_must_have_exactly_one_parent():
 
 @pytest.mark.django_db
 def test_subforum_allows_single_parent_domain_or_forum():
-    user = User.objects.create(google_id='g-d', email='u-d@example.com', username='u_domain')
+    user = User.objects.create(firebase_uid='g-d', email='u-d@example.com', username='u_domain')
     domain = Domain.objects.create(domain_name='DomainOnly', description='d')
-    forum_creator = User.objects.create(google_id='g-fo', email='f-o@example.com', username='forum_owner')
+    forum_creator = User.objects.create(firebase_uid='g-fo', email='f-o@example.com', username='forum_owner')
     forum = Forum.objects.create(creator=forum_creator, forum_name='ForumOnly', description='d')
 
     # parent_domain only should succeed

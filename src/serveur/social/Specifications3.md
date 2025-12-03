@@ -574,7 +574,7 @@ Relations de suivi entre utilisateurs.
 **Valeurs possibles pour `status` :**
 - `pending` : Demande en attente (profil private)
 - `accepted` : Demande acceptée
-- `rejected` : Demande refusée (soft delete)
+- `refused` : Demande refusée (soft delete)
 
 **Contraintes :**
 - UNIQUE(follower_id, following_id)

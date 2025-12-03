@@ -4,7 +4,7 @@ URL configuration for followers app.
 from django.urls import path
 from .views import (
     FollowUserView, UnfollowUserView, AcceptFollowRequestView,
-    RejectFollowRequestView, FollowersListView, FollowingListView,
+    RefuseFollowRequestView, FollowersListView, FollowingListView,
     PendingRequestsView
 )
 
@@ -20,6 +20,6 @@ urlpatterns = [
     path('<str:user_id>/follow/', FollowUserView.as_view(), name='follow-user'),
     path('<str:user_id>/unfollow/', UnfollowUserView.as_view(), name='unfollow-user'),
     path('<str:user_id>/accept/', AcceptFollowRequestView.as_view(), name='accept-request'),
-    path('<str:user_id>/reject/', RejectFollowRequestView.as_view(), name='reject-request'),
+    path('<str:user_id>/refuse/', RefuseFollowRequestView.as_view(), name='refuse-request'),
 ]
 

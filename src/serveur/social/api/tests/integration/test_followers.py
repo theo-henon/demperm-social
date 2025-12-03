@@ -309,13 +309,13 @@ class TestFollowersAPI:
         assert response.status_code in [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN]
     
     # ========================
-    # POST /<user_id>/reject/
+    # POST /<user_id>/refuse/
     # ========================
     
-    def test_reject_follow_request(self, api_client, private_user, public_user):
+    def test_refuse_follow_request(self, api_client, private_user, public_user):
         """
-        Test: POST /<user_id>/reject/
-        Spec: Reject a pending follow request
+        Test: POST /<user_id>/refuse/
+        Spec: Refuse a pending follow request
         """
         # Create pending follow request
         Follow.objects.create(
@@ -327,32 +327,32 @@ class TestFollowersAPI:
         api_client.force_authenticate(user=private_user)
         
         response = api_client.post(
-            f'/api/v1/followers/{public_user.user_id}/reject/'
+            f'/api/v1/followers/{public_user.user_id}/refuse/'
         )
         
         assert response.status_code == status.HTTP_204_NO_CONTENT
         
-        # Verify follow is rejected in database
+        # Verify follow is refused in database
         follow = Follow.objects.get(follower=public_user, following=private_user)
-        assert follow.status == 'rejected'
+        assert follow.status == 'refused'
     
-    def test_reject_nonexistent_follow_request(self, api_client, private_user, public_user):
+    def test_refuse_nonexistent_follow_request(self, api_client, private_user, public_user):
         """
-        Test: Reject nonexistent follow request
+        Test: Refuse nonexistent follow request
         Spec: NotFoundError
         """
         api_client.force_authenticate(user=private_user)
         
         response = api_client.post(
-            f'/api/v1/followers/{public_user.user_id}/reject/'
+            f'/api/v1/followers/{public_user.user_id}/refuse/'
         )
         
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert 'error' in response.data
     
-    def test_reject_non_pending_follow(self, api_client, private_user, public_user):
+    def test_refuse_non_pending_follow(self, api_client, private_user, public_user):
         """
-        Test: Cannot reject already accepted follow
+        Test: Cannot refuse already accepted follow
         Spec: ValidationError
         """
         # Create accepted follow request
@@ -365,18 +365,18 @@ class TestFollowersAPI:
         api_client.force_authenticate(user=private_user)
         
         response = api_client.post(
-            f'/api/v1/followers/{public_user.user_id}/reject/'
+            f'/api/v1/followers/{public_user.user_id}/refuse/'
         )
         
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert 'error' in response.data
     
-    def test_reject_requires_authentication(self, api_client, public_user):
+    def test_refuse_requires_authentication(self, api_client, public_user):
         """
-        Test: Unauthenticated users cannot reject follow requests
+        Test: Unauthenticated users cannot refuse follow requests
         """
         response = api_client.post(
-            f'/api/v1/followers/{public_user.user_id}/reject/'
+            f'/api/v1/followers/{public_user.user_id}/refuse/'
         )
         
         assert response.status_code in [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN]
@@ -706,7 +706,7 @@ class TestFollowersConformityWithSpecs:
         - POST /<user_id>/follow/ ✅
         - DELETE /<user_id>/unfollow/ ✅
         - POST /<user_id>/accept/ ✅
-        - POST /<user_id>/reject/ ✅
+        - POST /<user_id>/refuse/ ✅
         """
         # Routes are tested implicitly in TestFollowersAPI
         pass
@@ -719,7 +719,7 @@ class TestFollowersConformityWithSpecs:
         - follow_id (UUID, PK) ✅
         - follower (FK → User) ✅
         - following (FK → User) ✅
-        - status (CharField: pending, accepted, rejected) ✅
+        - status (CharField: pending, accepted, refused) ✅
         - created_at (DateTimeField) ✅
         
         Constraints:
@@ -747,11 +747,11 @@ class TestFollowersConformityWithSpecs:
         
         assert 'pending' in follow_status_choices
         assert 'accepted' in follow_status_choices
-        assert 'rejected' in follow_status_choices
+        assert 'refused' in follow_status_choices
         
         assert follow_status_choices['pending'] == 'Pending'
         assert follow_status_choices['accepted'] == 'Accepted'
-        assert follow_status_choices['rejected'] == 'Rejected'
+        assert follow_status_choices['refused'] == 'Refused'
     
     def test_user_profile_privacy_field(self):
         """Verify UserProfile privacy field exists and works correctly."""

@@ -127,7 +127,7 @@ class Follow(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
-        ('rejected', 'Rejected'),
+        ('refused', 'Refused'),
     ]
     
     follow_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

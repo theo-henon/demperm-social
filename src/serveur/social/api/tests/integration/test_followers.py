@@ -574,12 +574,12 @@ class TestFollowersAPI:
         assert response.status_code in [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN]
     
     # ========================
-    # GET /me/pending/
+    # GET /pending/
     # ========================
     
     def test_get_pending_requests(self, api_client, private_user, public_user, another_public_user):
         """
-        Test: GET /me/pending/
+        Test: GET /pending/
         Spec: Get pending follow requests for current user
         """
         # Create pending follow requests for private_user
@@ -596,7 +596,7 @@ class TestFollowersAPI:
         
         api_client.force_authenticate(user=private_user)
         
-        response = api_client.get('/api/v1/followers/me/pending/')
+        response = api_client.get('/api/v1/followers/pending/')
         
         assert response.status_code == status.HTTP_200_OK
         assert isinstance(response.data, list)
@@ -613,11 +613,11 @@ class TestFollowersAPI:
     
     def test_get_pending_requests_empty_list(self, api_client, public_user):
         """
-        Test: GET /me/pending/ with no pending requests
+        Test: GET /pending/ with no pending requests
         """
         api_client.force_authenticate(user=public_user)
         
-        response = api_client.get('/api/v1/followers/me/pending/')
+        response = api_client.get('/api/v1/followers/pending/')
         
         assert response.status_code == status.HTTP_200_OK
         assert isinstance(response.data, list)
@@ -625,7 +625,7 @@ class TestFollowersAPI:
     
     def test_get_pending_requests_only_pending(self, api_client, private_user, public_user, another_public_user):
         """
-        Test: GET /me/pending/ returns only pending requests
+        Test: GET /pending/ returns only pending requests
         """
         # Create pending request
         Follow.objects.create(
@@ -642,7 +642,7 @@ class TestFollowersAPI:
         
         api_client.force_authenticate(user=private_user)
         
-        response = api_client.get('/api/v1/followers/me/pending/')
+        response = api_client.get('/api/v1/followers/pending/')
         
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 1
@@ -650,7 +650,7 @@ class TestFollowersAPI:
     
     def test_get_pending_requests_pagination(self, api_client, private_user, db):
         """
-        Test: GET /me/pending/ with pagination
+        Test: GET /pending/ with pagination
         """
         # Create multiple pending requests
         for i in range(5):
@@ -673,12 +673,12 @@ class TestFollowersAPI:
         api_client.force_authenticate(user=private_user)
         
         # Test default pagination
-        response = api_client.get('/api/v1/followers/me/pending/')
+        response = api_client.get('/api/v1/followers/pending/')
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == 5
         
         # Test with custom page size
-        response = api_client.get('/api/v1/followers/me/pending/?page_size=2')
+        response = api_client.get('/api/v1/followers/pending/?page_size=2')
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) <= 2
     
@@ -686,7 +686,7 @@ class TestFollowersAPI:
         """
         Test: Unauthenticated users cannot get pending requests
         """
-        response = api_client.get('/api/v1/followers/me/pending/')
+        response = api_client.get('/api/v1/followers/pending/')
         
         assert response.status_code in [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN]
 
@@ -702,7 +702,7 @@ class TestFollowersConformityWithSpecs:
         Expected routes:
         - GET /me/followers/ ✅
         - GET /me/following/ ✅
-        - GET /me/pending/ ✅
+        - GET /pending/ ✅
         - POST /<user_id>/follow/ ✅
         - DELETE /<user_id>/unfollow/ ✅
         - POST /<user_id>/accept/ ✅

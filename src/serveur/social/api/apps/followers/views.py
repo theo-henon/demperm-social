@@ -98,21 +98,21 @@ class AcceptFollowRequestView(APIView):
             )
 
 
-class RejectFollowRequestView(APIView):
-    """Reject a follow request."""
+class RefuseFollowRequestView(APIView):
+    """Refuse a follow request."""
     
     permission_classes = [IsAuthenticated, IsNotBanned]
     
     @swagger_auto_schema(
-        operation_description="Reject a follow request",
-        responses={204: 'Rejected successfully'}
+        operation_description="Refuse a follow request",
+        responses={204: 'Refuseed successfully'}
     )
     @rate_limit_general
     def post(self, request, user_id):
-        """Reject follow request."""
+        """Refuse follow request."""
         try:
             ip_address = get_client_ip(request)
-            FollowerService.reject_follow_request(str(request.user.user_id), user_id, ip_address)
+            FollowerService.refuse_follow_request(str(request.user.user_id), user_id, ip_address)
             return Response(status=status.HTTP_204_NO_CONTENT)
         except NotFoundError as e:
             return Response(

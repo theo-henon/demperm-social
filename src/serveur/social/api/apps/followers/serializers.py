@@ -9,7 +9,7 @@ class FollowSerializer(serializers.Serializer):
     follow_id = serializers.UUIDField(read_only=True)
     follower_id = serializers.UUIDField(read_only=True)
     followed_id = serializers.UUIDField(read_only=True)
-    status = serializers.ChoiceField(choices=['pending', 'accepted', 'rejected'], read_only=True)
+    status = serializers.ChoiceField(choices=['pending', 'accepted', 'refused'], read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
 
 

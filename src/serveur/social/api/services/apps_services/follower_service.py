@@ -118,12 +118,12 @@ class FollowerService:
     
     @staticmethod
     @transaction.atomic
-    def reject_follow_request(
+    def refuse_follow_request(
         followed_id: str,
         follower_id: str,
         ip_address: Optional[str] = None
     ) -> None:
-        """Reject a follow request."""
+        """Refuse a follow request."""
         follow = FollowRepository.get_follow(follower_id, followed_id)
         if not follow:
             raise NotFoundError("Follow request not found")
@@ -131,13 +131,13 @@ class FollowerService:
         if follow.status != 'pending':
             raise ValidationError("Follow request is not pending")
         
-        # Update status to rejected
-        FollowRepository.update_status(follower_id, followed_id, 'rejected')
+        # Update status to refused
+        FollowRepository.update_status(follower_id, followed_id, 'refused')
         
         # Audit log
         AuditLogRepository.create(
             user_id=followed_id,
-            action_type='follow_rejected',
+            action_type='follow_refused',
             resource_type='user',
             resource_id=follower_id,
             ip_address=ip_address

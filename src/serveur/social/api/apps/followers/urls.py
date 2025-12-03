@@ -12,7 +12,7 @@ app_name = 'followers'
 
 urlpatterns = [
     # Current user's followers/following
-    path('me/followers/', FollowersListView.as_view(), name='my-followers'),
+    path('me/', FollowersListView.as_view(), name='my-followers'),
     path('following/', FollowingListView.as_view(), name='my-following'),
     path('pending/', PendingRequestsView.as_view(), name='pending-requests'),
     

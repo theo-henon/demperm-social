@@ -382,12 +382,12 @@ class TestFollowersAPI:
         assert response.status_code in [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN]
     
     # ========================
-    # GET /me/followers/
+    # GET /me/
     # ========================
     
     def test_get_followers_list(self, api_client, public_user, another_public_user, private_user):
         """
-        Test: GET /me/followers/
+        Test: GET /me/
         Spec: Get current user's followers list
         """
         # another_public_user and private_user follow public_user
@@ -404,7 +404,7 @@ class TestFollowersAPI:
         
         api_client.force_authenticate(user=public_user)
         
-        response = api_client.get('/api/v1/followers/me/followers/')
+        response = api_client.get('/api/v1/followers/me/')
         
         assert response.status_code == status.HTTP_200_OK
         assert isinstance(response.data, list)
@@ -424,11 +424,11 @@ class TestFollowersAPI:
     
     def test_get_followers_empty_list(self, api_client, public_user):
         """
-        Test: GET /me/followers/ with no followers
+        Test: GET /me/ with no followers
         """
         api_client.force_authenticate(user=public_user)
         
-        response = api_client.get('/api/v1/followers/me/followers/')
+        response = api_client.get('/api/v1/followers/me/')
         
         assert response.status_code == status.HTTP_200_OK
         assert isinstance(response.data, list)
@@ -436,7 +436,7 @@ class TestFollowersAPI:
     
     def test_get_followers_pagination(self, api_client, public_user, db):
         """
-        Test: GET /me/followers/ with pagination
+        Test: GET /me/ with pagination
         """
         # Create multiple followers
         for i in range(5):
@@ -459,13 +459,13 @@ class TestFollowersAPI:
         api_client.force_authenticate(user=public_user)
         
         # Test default pagination
-        response = api_client.get('/api/v1/followers/me/followers/')
+        response = api_client.get('/api/v1/followers/me/')
         assert response.status_code == status.HTTP_200_OK
         assert isinstance(response.data, list)
         assert len(response.data) == 5
         
         # Test with custom page size
-        response = api_client.get('/api/v1/followers/me/followers/?page_size=2')
+        response = api_client.get('/api/v1/followers/me/?page_size=2')
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) <= 2
     
@@ -473,7 +473,7 @@ class TestFollowersAPI:
         """
         Test: Unauthenticated users cannot get followers
         """
-        response = api_client.get('/api/v1/followers/me/followers/')
+        response = api_client.get('/api/v1/followers/me/')
         
         assert response.status_code in [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN]
     
@@ -700,7 +700,7 @@ class TestFollowersConformityWithSpecs:
         Verify all routes match urls.py.
         
         Expected routes:
-        - GET /me/followers/ ✅
+        - GET /me/ ✅
         - GET /following/ ✅
         - GET /pending/ ✅
         - POST /<user_id>/follow/ ✅

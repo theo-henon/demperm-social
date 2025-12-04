@@ -205,3 +205,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+#FIrebase
+demperm-social-firebase-adminsdk-fbsvc-0b93861e1c.json
+

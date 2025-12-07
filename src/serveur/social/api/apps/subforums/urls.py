@@ -8,5 +8,6 @@ app_name = 'subforums'
 
 urlpatterns = [
     path('<str:subforum_id>/', SubforumDetailView.as_view(), name='subforum-detail'),
+    path('<str:subforum_id>/subforums/', SubforumChildrenView.as_view(), name='subforum-children'),
     path('<str:subforum_id>/posts/', SubforumPostsView.as_view(), name='subforum-posts'),
 ]

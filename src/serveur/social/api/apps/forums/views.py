@@ -316,13 +316,33 @@ class CreateForumSubforumView(APIView):
             name = Validator.validate_forum_name(serializer.validated_data['name'])
             description = Validator.validate_description(serializer.validated_data['description'])
 
-            subforum = SubforumRepository.create(
-                creator_id=str(request.user.user_id),
-                subforum_name=name,
-                description=description,
-                parent_domain_id=None,
-                parent_forum_id=forum_id
-            )
+            parent_subforum_id = serializer.validated_data.get('parent_subforum_id')
+
+            if parent_subforum_id:
+                # validate parent exists and belongs to the same forum
+                parent = SubforumRepository.get_by_id(parent_subforum_id)
+                if not parent:
+                    return Response({'error': {'code': 'VALIDATION_ERROR', 'message': f'Parent subforum {parent_subforum_id} not found'}}, status=status.HTTP_400_BAD_REQUEST)
+                # parent must belong to this forum (cannot nest under a subforum for another forum)
+                if not parent.forum_id or str(parent.forum_id) != str(forum_id):
+                    return Response({'error': {'code': 'VALIDATION_ERROR', 'message': 'Parent subforum does not belong to this forum'}}, status=status.HTTP_400_BAD_REQUEST)
+
+                # create nested subforum under the given parent
+                subforum = DomainService.create_subforum_in_subforum(
+                    user_id=str(request.user.user_id),
+                    parent_subforum_id=str(parent_subforum_id),
+                    name=name,
+                    description=description,
+                    ip_address=get_client_ip(request)
+                )
+            else:
+                subforum = SubforumRepository.create(
+                    creator_id=str(request.user.user_id),
+                    subforum_name=name,
+                    description=description,
+                    parent_domain_id=None,
+                    parent_forum_id=forum_id
+                )
 
             # Audit
             ip_address = get_client_ip(request)

@@ -152,6 +152,12 @@ class SubforumRepository:
         offset = (page - 1) * page_size
         # return any subforums that belong to the given top-level forum (direct children or nested)
         return Subforum.objects.filter(forum_id=forum_id).select_related('creator')[offset:offset + page_size]
+
+    @staticmethod
+    def get_by_parent_subforum(parent_subforum_id: str, page: int = 1, page_size: int = 20) -> List[Subforum]:
+        """Get direct child subforums for a given parent subforum."""
+        offset = (page - 1) * page_size
+        return Subforum.objects.filter(parent_subforum_id=parent_subforum_id).select_related('creator')[offset:offset + page_size]
     
     @staticmethod
     def increment_post_count(subforum_id: str) -> None:

@@ -87,6 +87,22 @@ class Subforum(models.Model):
         blank=True,
         related_name='subforums'
     )
+    # allow nesting: a subforum can have another subforum as parent
+    parent_subforum = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='subforums'
+    )
+    # top-level forum reference for quick lookups (set automatically)
+    forum = models.ForeignKey(
+        Forum,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='all_subforums'
+    )
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_subforums')
     subforum_name = models.CharField(max_length=200, validators=[MinLengthValidator(3)])
     description = models.TextField(max_length=1000, null=True, blank=True)
@@ -98,14 +114,17 @@ class Subforum(models.Model):
         indexes = [
             models.Index(fields=['parent_domain']),
             models.Index(fields=['parent_forum']),
+            models.Index(fields=['parent_subforum']),
+            models.Index(fields=['forum']),
             models.Index(fields=['creator']),
         ]
         constraints = [
             # Ensure exactly one parent is set
             models.CheckConstraint(
                 check=(
-                    models.Q(parent_domain__isnull=False, parent_forum__isnull=True) |
-                    models.Q(parent_domain__isnull=True, parent_forum__isnull=False)
+                    models.Q(parent_domain__isnull=False, parent_forum__isnull=True, parent_subforum__isnull=True) |
+                    models.Q(parent_domain__isnull=True, parent_forum__isnull=False, parent_subforum__isnull=True) |
+                    models.Q(parent_domain__isnull=True, parent_forum__isnull=True, parent_subforum__isnull=False)
                 ),
                 name='subforum_one_parent'
             )
@@ -118,6 +137,25 @@ class Subforum(models.Model):
     @property
     def name(self):
         return self.subforum_name
+    
+    def save(self, *args, **kwargs):
+        """Ensure `forum` is set from parent_forum or parent_subforum if available."""
+        # If directly under a forum, use that forum
+        if self.parent_forum_id:
+            self.forum_id = self.parent_forum_id
+        # If nested under another subforum, inherit its top-level forum
+        elif self.parent_subforum_id:
+            try:
+                parent = Subforum.objects.get(subforum_id=self.parent_subforum_id)
+                self.forum_id = parent.forum_id
+            except Subforum.DoesNotExist:
+                # leave forum as-is; repository/service should validate parent exists
+                pass
+        else:
+            # domain-level subforums have no forum
+            self.forum = None
+
+        super().save(*args, **kwargs)
     
 
 

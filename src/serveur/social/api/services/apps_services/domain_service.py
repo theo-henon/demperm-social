@@ -78,7 +78,9 @@ class DomainService:
             subforum_name=name,
             description=description,
             parent_domain_id=domain_id,
-            parent_forum_id=None
+            parent_forum_id=None,
+            parent_subforum_id=None,
+            forum_id=None
         )
         
         # Increment domain subforum count
@@ -94,6 +96,87 @@ class DomainService:
             ip_address=ip_address
         )
         
+        return subforum
+
+    @staticmethod
+    @transaction.atomic
+    def create_subforum_in_forum(
+        user_id: str,
+        forum_id: str,
+        name: str,
+        description: str,
+        ip_address: Optional[str] = None
+    ) -> Subforum:
+        """Create a subforum under a forum (top-level forum parent)."""
+        name = Validator.validate_forum_name(name)
+        description = Validator.validate_description(description)
+
+        # ensure forum exists
+        from db.repositories.domain_repository import ForumRepository
+        forum = ForumRepository.get_by_id(forum_id)
+        if not forum:
+            raise NotFoundError(f"Forum {forum_id} not found")
+
+        subforum = SubforumRepository.create(
+            creator_id=user_id,
+            subforum_name=name,
+            description=description,
+            parent_domain_id=None,
+            parent_forum_id=forum_id,
+            parent_subforum_id=None,
+            forum_id=forum_id
+        )
+
+        AuditLogRepository.create(
+            user_id=user_id,
+            action_type='subforum_created',
+            resource_type='subforum',
+            resource_id=str(subforum.subforum_id),
+            details={'forum_id': forum_id},
+            ip_address=ip_address
+        )
+
+        return subforum
+
+    @staticmethod
+    @transaction.atomic
+    def create_subforum_in_subforum(
+        user_id: str,
+        parent_subforum_id: str,
+        name: str,
+        description: str,
+        ip_address: Optional[str] = None
+    ) -> Subforum:
+        """Create a nested subforum under another subforum."""
+        name = Validator.validate_forum_name(name)
+        description = Validator.validate_description(description)
+
+        parent = SubforumRepository.get_by_id(parent_subforum_id)
+        if not parent:
+            raise NotFoundError(f"Parent subforum {parent_subforum_id} not found")
+
+        # inherit top-level forum from parent (may be None if parent is domain-level)
+        forum_id = parent.forum_id
+
+        subforum = SubforumRepository.create(
+            creator_id=user_id,
+            subforum_name=name,
+            description=description,
+            parent_domain_id=None,
+            parent_forum_id=None,
+            parent_subforum_id=parent_subforum_id,
+            forum_id=forum_id
+        )
+
+        AuditLogRepository.create(
+            user_id=user_id,
+            action_type='subforum_created',
+            resource_type='subforum',
+            resource_id=str(subforum.subforum_id),
+            details={'parent_subforum_id': parent_subforum_id, 'forum_id': forum_id},
+            ip_address=ip_address
+        )
+
         return subforum
     
     @staticmethod

@@ -52,7 +52,16 @@ class PostRepository:
     def get_by_subforum(subforum_id: str, page: int = 1, page_size: int = 20) -> List[Post]:
         """Get posts in a subforum."""
         offset = (page - 1) * page_size
-        return Post.objects.filter(subforum_id=subforum_id).select_related('user', 'user__profile').order_by('-created_at')[offset:offset + page_size]
+        # If the provided id matches a subforum, return posts for that subforum.
+        # Otherwise, treat the id as a forum id and return posts across all subforums of that forum.
+        from db.entities.domain_entity import Subforum
+
+        if Subforum.objects.filter(subforum_id=subforum_id).exists():
+            qs = Post.objects.filter(subforum_id=subforum_id)
+        else:
+            qs = Post.objects.filter(subforum__forum_id=subforum_id)
+
+        return qs.select_related('user', 'user__profile').order_by('-created_at')[offset:offset + page_size]
     
     @staticmethod
     def get_by_user(user_id: str, page: int = 1, page_size: int = 20) -> List[Post]:

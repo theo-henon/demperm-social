@@ -44,6 +44,20 @@ class User(models.Model):
     def __str__(self):
         return self.username
 
+    @property
+    def is_authenticated(self) -> bool:
+        """Compatibility property so Django permission checks work with this model.
+
+        This property is writable to support tests that set `user.is_authenticated = True`.
+        If not explicitly set, defaults to True (model instances represent authenticated users
+        when used with the project's custom authentication layer).
+        """
+        return getattr(self, '_is_authenticated', True)
+
+    @is_authenticated.setter
+    def is_authenticated(self, value: bool) -> None:
+        self._is_authenticated = bool(value)
+
 
 class UserProfile(models.Model):
     """User profile information."""

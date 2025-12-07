@@ -37,3 +37,19 @@ def test_subforum_allows_single_parent_domain_or_forum():
     s2 = Subforum.objects.create(creator=user, subforum_name='ForumSub', parent_forum=forum)
     assert s2.parent_forum_id == forum.forum_id
     assert s2.parent_domain_id is None
+
+
+@pytest.mark.django_db
+def test_nested_subforum_inherits_forum():
+    user = User.objects.create(firebase_uid='g-ns', email='u-ns@example.com', username='u_nested')
+    forum_creator = User.objects.create(firebase_uid='g-fo2', email='f-o2@example.com', username='forum_owner2')
+    forum = Forum.objects.create(creator=forum_creator, forum_name='ForumParent', description='d')
+
+    # create parent subforum under forum
+    parent = Subforum.objects.create(creator=user, subforum_name='ParentSub', parent_forum=forum)
+    assert parent.forum_id == forum.forum_id
+
+    # create child subforum under parent subforum -> should inherit forum
+    child = Subforum.objects.create(creator=user, subforum_name='ChildSub', parent_subforum=parent)
+    assert child.parent_subforum_id == parent.subforum_id
+    assert child.forum_id == forum.forum_id

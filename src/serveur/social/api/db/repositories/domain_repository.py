@@ -119,24 +119,21 @@ class SubforumRepository:
     
     @staticmethod
     def create(creator_id: str, subforum_name: str, description: Optional[str] = None,
-               parent_domain_id: Optional[str] = None, parent_forum_id: Optional[str] = None,
-               parent_subforum_id: Optional[str] = None, forum_id: Optional[str] = None) -> Subforum:
+               parent_domain_id: Optional[str] = None, parent_forum_id: Optional[str] = None) -> Subforum:
         """Create a new subforum."""
         return Subforum.objects.create(
             creator_id=creator_id,
             subforum_name=subforum_name,
             description=description,
             parent_domain_id=parent_domain_id,
-            parent_forum_id=parent_forum_id,
-            parent_subforum_id=parent_subforum_id,
-            forum_id=forum_id
+            parent_forum_id=parent_forum_id
         )
     
     @staticmethod
     def get_by_id(subforum_id: str) -> Optional[Subforum]:
         """Get subforum by ID."""
         try:
-            return Subforum.objects.select_related('creator', 'parent_domain', 'parent_forum', 'parent_subforum', 'forum').get(subforum_id=subforum_id)
+            return Subforum.objects.select_related('creator', 'parent_domain', 'parent_forum').get(subforum_id=subforum_id)
         except Subforum.DoesNotExist:
             return None
     
@@ -150,14 +147,7 @@ class SubforumRepository:
     def get_by_forum(forum_id: str, page: int = 1, page_size: int = 20) -> List[Subforum]:
         """Get subforums by forum."""
         offset = (page - 1) * page_size
-        # return any subforums that belong to the given top-level forum (direct children or nested)
-        return Subforum.objects.filter(forum_id=forum_id).select_related('creator')[offset:offset + page_size]
-
-    @staticmethod
-    def get_by_parent_subforum(parent_subforum_id: str, page: int = 1, page_size: int = 20) -> List[Subforum]:
-        """Get direct child subforums for a given parent subforum."""
-        offset = (page - 1) * page_size
-        return Subforum.objects.filter(parent_subforum_id=parent_subforum_id).select_related('creator')[offset:offset + page_size]
+        return Subforum.objects.filter(parent_forum_id=forum_id).select_related('creator')[offset:offset + page_size]
     
     @staticmethod
     def increment_post_count(subforum_id: str) -> None:

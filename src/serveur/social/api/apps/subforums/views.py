@@ -32,6 +32,7 @@ class SubforumDetailView(APIView):
             subforum = DomainService.get_subforum_by_id(subforum_id)
 
             return Response({
+                'forum_id': str(subforum.forum_id_id),
                 'subforum_id': str(subforum.subforum_id),
                 'name': subforum.name,
                 'description': subforum.description,
@@ -75,6 +76,7 @@ class SubforumChildrenView(APIView):
         subforums = SubforumRepository.get_by_parent_subforum(subforum_id, page, page_size)
 
         data = [{
+            'forum_id': str(s.forum_id_id),
             'subforum_id': str(s.subforum_id),
             'name': s.name,
             'description': s.description,

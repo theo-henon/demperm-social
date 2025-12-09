@@ -72,6 +72,13 @@ class Subforum(models.Model):
     """Subforums (can belong to Domain or Forum)."""
     
     subforum_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    forum_id = models.ForeignKey(
+        Forum, 
+        on_delete=models.CASCADE,
+        related_name='subforums_in_forum',
+        null=False,
+        blank=False
+    )
     # parent_id can reference either Domain or Forum (polymorphic)
     parent_domain = models.ForeignKey(
         Domain,

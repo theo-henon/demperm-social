@@ -1,6 +1,7 @@
 """
 User repository for data access.
 """
+
 from typing import Optional, List
 from django.db.models import Q
 from db.entities.user_entity import User, UserProfile, UserSettings, Block, Follow
@@ -150,6 +151,16 @@ class FollowRepository:
             follower_id=user_id,
             status=status
         ).select_related('following')[offset:offset + page_size]
+
+    @staticmethod
+    def get_follow(viewer_id:str,followed_id:str):
+        follw = Follow.objects.filter(
+            follower_id=viewer_id,
+            following_id=followed_id
+        )
+        if len(follw) == 0:
+            return None
+        return follw[0]
     
     @staticmethod
     def get_pending_requests(user_id: str) -> List[Follow]:

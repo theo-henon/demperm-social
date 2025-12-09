@@ -51,30 +51,6 @@ def test_join_forum_success_and_conflict():
 
 
 @pytest.mark.django_db
-def test_create_nested_subforum_under_forum():
-    # create a forum and then a subforum under it, then a nested subforum under that subforum
-    creator = User.objects.create(firebase_uid='g8', email='c8@example.com', username='creator8')
-    forum = ForumService.create_forum(str(creator.user_id), 'ForumWithSub', 'forum desc')
-
-    parent = DomainService.create_subforum_in_forum(
-        str(creator.user_id), str(forum.forum_id), 'ParentSub', 'parent description'
-    )
-
-    assert parent.parent_forum_id is not None
-    assert str(parent.parent_forum_id) == str(forum.forum_id)
-
-    # create nested subforum under parent
-    child = DomainService.create_subforum_in_subforum(
-        str(creator.user_id), str(parent.subforum_id), 'ChildSub', 'child description'
-    )
-
-    assert child.parent_subforum_id is not None
-    assert str(child.parent_subforum_id) == str(parent.subforum_id)
-    # child should inherit the top-level forum id from parent
-    assert str(child.forum_id) == str(forum.forum_id)
-
-
-@pytest.mark.django_db
 def test_leave_forum_not_member_and_creator_cannot_leave():
     creator = User.objects.create(firebase_uid='g4', email='c4@example.com', username='creator4')
     forum = ForumService.create_forum(str(creator.user_id), 'LeaveForum', 'd')

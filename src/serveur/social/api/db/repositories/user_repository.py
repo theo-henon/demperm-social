@@ -43,10 +43,10 @@ class UserRepository:
             return None
     
     @staticmethod
-    def create(google_id: str, email: str, username: str) -> User:
+    def create(firebase_id: str, email: str, username: str) -> User:
         """Create a new user with profile and settings."""
         user = User.objects.create(
-            google_id=google_id,
+            firebase_id=firebase_id,
             email=email,
             username=username
         )

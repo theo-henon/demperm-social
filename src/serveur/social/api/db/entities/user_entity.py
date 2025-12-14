@@ -10,7 +10,7 @@ class User(models.Model):
     """Main user table."""
     
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    google_id = models.CharField(max_length=255, unique=True, db_index=True)
+    firebase_uid = models.CharField(max_length=255, unique=True, db_index=True)
     email = models.EmailField(max_length=255, unique=True, db_index=True)
     username = models.CharField(
         max_length=50,
@@ -37,12 +37,26 @@ class User(models.Model):
         db_table = 'users'
         indexes = [
             models.Index(fields=['email']),
-            models.Index(fields=['google_id']),
+            models.Index(fields=['firebase_uid']),
             models.Index(fields=['username']),
         ]
     
     def __str__(self):
         return self.username
+
+    @property
+    def is_authenticated(self) -> bool:
+        """Compatibility property so Django permission checks work with this model.
+
+        This property is writable to support tests that set `user.is_authenticated = True`.
+        If not explicitly set, defaults to True (model instances represent authenticated users
+        when used with the project's custom authentication layer).
+        """
+        return getattr(self, '_is_authenticated', True)
+
+    @is_authenticated.setter
+    def is_authenticated(self, value: bool) -> None:
+        self._is_authenticated = bool(value)
 
 
 class UserProfile(models.Model):
@@ -56,10 +70,11 @@ class UserProfile(models.Model):
     profile_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     display_name = models.CharField(max_length=100, null=True, blank=True)
-    profile_picture_url = models.URLField(max_length=500, null=True, blank=True)
-    bio = models.TextField(max_length=500, null=True, blank=True)
-    location = models.CharField(max_length=100, null=True, blank=True)
-    privacy = models.CharField(max_length=20, choices=PRIVACY_CHOICES, default='public')
+    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
+    profile_picture_url = models.URLField(max_length=500, null=True, blank=True)  # Deprecated, kept for backward compatibility
+    bio = models.TextField(max_length=500, default='', blank=True)
+    location = models.CharField(max_length=100, default='', blank=True)
+    privacy = models.BooleanField(default=True)  # True = public, False = private
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -126,7 +141,7 @@ class Follow(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
-        ('rejected', 'Rejected'),
+        ('refused', 'Refused'),
     ]
     
     follow_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

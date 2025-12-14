@@ -3,6 +3,8 @@ Domain and Forum repository for data access.
 """
 from typing import Optional, List
 from django.db.models import F
+from django.db import IntegrityError
+from common.exceptions import ConflictError
 from db.entities.domain_entity import Domain, Forum, Subforum, Membership
 
 
@@ -38,6 +40,25 @@ class DomainRepository:
             description=description,
             icon_url=icon_url
         )
+
+    @staticmethod
+    def update(domain: Domain, domain_name: Optional[str] = None,
+               description: Optional[str] = None, icon_url: Optional[str] = None) -> Domain:
+        """Update an existing domain instance and persist changes."""
+        if domain_name is not None:
+            domain.domain_name = domain_name
+        if description is not None:
+            domain.description = description
+        if icon_url is not None:
+            domain.icon_url = icon_url
+        domain.save()
+        return domain
+
+    @staticmethod
+    def delete(domain_id: str) -> bool:
+        """Delete a domain by id. Returns True if a row was removed."""
+        deleted, _ = Domain.objects.filter(domain_id=domain_id).delete()
+        return deleted > 0
     
     @staticmethod
     def increment_subforum_count(domain_id: str) -> None:
@@ -99,11 +120,38 @@ class SubforumRepository:
     """Repository for Subforum entity operations."""
     
     @staticmethod
-    def create(creator_id: str, subforum_name: str, description: Optional[str] = None,
+    def create(creator_id: str, subforum_name: str, forum_id: Optional[str] = None, description: Optional[str] = None,
                parent_domain_id: Optional[str] = None, parent_forum_id: Optional[str] = None) -> Subforum:
-        """Create a new subforum."""
+        """Create a new subforum.
+
+        If `parent_forum_id` or `forum_id` is provided, attach the subforum to that existing Forum.
+        Otherwise create a new Forum (named after the subforum) and attach to it.
+        """
+        # If the caller provided an explicit `forum_id`, attach to that Forum.
+        # Otherwise create a new Forum to represent this Subforum, and set
+        # `parent_forum_id` only as the parent relationship (if provided).
+        if forum_id:
+            # attach to existing forum by setting the FK id directly
+            return Subforum.objects.create(
+                creator_id=creator_id,
+                forum_id_id=forum_id,
+                subforum_name=subforum_name,
+                description=description,
+                parent_domain_id=parent_domain_id,
+                parent_forum_id=parent_forum_id
+            )
+
+        # Create a new forum record for this subforum (its own forum context)
+        try:
+            new_forum = ForumRepository.create(creator_id=creator_id, forum_name=subforum_name)
+        except IntegrityError as exc:
+            # Name collision when auto-creating a Forum for the subforum.
+            # Surface a clean ConflictError so the view returns 409 instead of 500.
+            raise ConflictError(f"Forum with name '{subforum_name}' already exists") from exc
+
         return Subforum.objects.create(
             creator_id=creator_id,
+            forum_id=new_forum,
             subforum_name=subforum_name,
             description=description,
             parent_domain_id=parent_domain_id,

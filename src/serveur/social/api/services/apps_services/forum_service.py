@@ -3,6 +3,7 @@ Forum service for forum management operations.
 """
 from typing import List, Optional
 from django.db import transaction
+from django.db import IntegrityError
 from db.repositories.domain_repository import ForumRepository, SubforumRepository, MembershipRepository
 from db.repositories.message_repository import AuditLogRepository
 from db.entities.domain_entity import Forum, Membership
@@ -38,11 +39,15 @@ class ForumService:
         description = Validator.validate_description(description)
         
         # Create forum
-        forum = ForumRepository.create(
-            creator_id=user_id,
-            name=name,
-            description=description
-        )
+        try:
+            forum = ForumRepository.create(
+                creator_id=user_id,
+                forum_name=name,
+                description=description
+            )
+        except IntegrityError as exc:
+            # Likely a unique constraint on forum_name - surface as a 409 Conflict
+            raise ConflictError(f"Forum with name '{name}' already exists") from exc
         
         # Auto-join creator as moderator
         MembershipRepository.create(user_id, str(forum.forum_id), role='moderator')

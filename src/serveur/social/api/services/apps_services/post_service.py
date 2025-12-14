@@ -126,14 +126,14 @@ class PostService:
         
         # Check permission
         user = UserRepository.get_by_id(user_id)
-        if str(post.user_id) != user_id and not user.is_admin:
+        if str(post.user.user_id) != str(user_id) and not user.is_admin:
             raise PermissionDeniedError("Not authorized to delete this post")
         
         # Delete post
         PostRepository.delete(post_id)
         
         # Decrement subforum post count
-        SubforumRepository.decrement_post_count(str(post.subforum_id))
+        SubforumRepository.decrement_post_count(str(post.subforum.subforum_id))
         
         # Audit log
         AuditLogRepository.create(

@@ -149,22 +149,22 @@ class FollowRepository:
             return None
     
     @staticmethod
-    def get_followers(user_id: str, page: int = 1, page_size: int = 20) -> List[User]:
+    def get_followers(user_id: str, status: str = 'accepted', page: int = 1, page_size: int = 20) -> List[User]:
         """Get user's followers (returns User objects)."""
         offset = (page - 1) * page_size
         follows = Follow.objects.filter(
             following_id=user_id,
-            status='accepted'
+            status=status
         ).select_related('follower', 'follower__profile')[offset:offset + page_size]
         return [follow.follower for follow in follows]
 
     @staticmethod
-    def get_following(user_id: str, page: int = 1, page_size: int = 20) -> List[User]:
+    def get_following(user_id: str, status: str = 'accepted', page: int = 1, page_size: int = 20) -> List[User]:
         """Get users that user is following (returns User objects)."""
         offset = (page - 1) * page_size
         follows = Follow.objects.filter(
             follower_id=user_id,
-            status='accepted'
+            status=status
         ).select_related('following', 'following__profile')[offset:offset + page_size]
         return [follow.following for follow in follows]
 

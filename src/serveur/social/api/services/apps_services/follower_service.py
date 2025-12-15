@@ -147,12 +147,13 @@ class FollowerService:
     @staticmethod
     def get_followers(user_id: str, page: int = 1, page_size: int = 20) -> List[User]:
         """Get list of followers."""
-        return FollowRepository.get_followers(user_id, page, page_size)
+        # Default to accepted followers unless caller specifies otherwise
+        return FollowRepository.get_followers(user_id=user_id, status='accepted', page=page, page_size=page_size)
     
     @staticmethod
     def get_following(user_id: str, page: int = 1, page_size: int = 20) -> List[User]:
         """Get list of users being followed."""
-        return FollowRepository.get_following(user_id, page, page_size)
+        return FollowRepository.get_following(user_id=user_id, status='accepted', page=page, page_size=page_size)
     
     @staticmethod
     def get_pending_requests(user_id: str, page: int = 1, page_size: int = 20) -> List[Follow]:

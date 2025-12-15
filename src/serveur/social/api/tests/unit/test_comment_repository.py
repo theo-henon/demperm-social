@@ -38,20 +38,16 @@ def test_user(db):
         email='test@example.com',
         username='testuser'
     )
-    UserProfile.objects.create(user=user)
-    UserSettings.objects.create(user=user)
     return user
 
 @pytest.fixture
 def user2(db):
     """Create a second test user."""
-    user =  UserRepository.create(
+    user = UserRepository.create(
         firebase_id='user2-firebase-uid',
         email='user2@example.com',
         username='user2'
     )
-    UserProfile.objects.create(user=user)
-    UserSettings.objects.create(user=user)
     return user
 
 
@@ -72,7 +68,7 @@ def test_comment(db, test_user, test_post):
 
 
 @pytest.mark.django_db
-class TestCommentRepository(TestCase):
+class TestCommentRepository:
       def test_comment_create(self,test_user,test_post):
           nbcomment =   PostRepository.get_by_id(test_post.post_id).comment_count
           """Create a test comment."""
@@ -103,7 +99,7 @@ class TestCommentRepository(TestCase):
           assert comment is None
 
       def test_delete(self,test_user,test_post):
-          nbcomment = PostRepository.get_by_id(test_post).comment_count
+          nbcomment = PostRepository.get_by_id(test_post.post_id).comment_count
           comment = CommentRepository.create(test_user.user_id,test_post.post_id,"Hello world",parent_comment_id=None)
           delete = CommentRepository.delete(comment.comment_id)
           assert delete == True
@@ -122,7 +118,7 @@ class TestCommentRepository(TestCase):
           assert delete == True
           assert CommentRepository.get_by_id(comment.comment_id) is None
           assert CommentRepository.get_by_id(reply.comment_id) is None
-          assert nbcomment == CommentRepository.get_by_id(test_post.post_id).comment_count
+          assert nbcomment == PostRepository.get_by_id(test_post.post_id).comment_count
 
       def test_get_comment_by_post(self,test_post,test_user,test_comment):
           comment = CommentRepository.create(test_user.user_id,test_post.post_id,"Hello world",parent_comment_id=None)

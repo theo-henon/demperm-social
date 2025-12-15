@@ -99,7 +99,7 @@ class TestFollowersAPI:
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data['status'] == 'accepted'
         assert str(response.data['follower_id']) == str(public_user.user_id)
-        assert str(response.data['followed_id']) == str(another_public_user.user_id)
+        assert str(response.data['following_id']) == str(another_public_user.user_id)
         assert 'follow_id' in response.data
         assert 'created_at' in response.data
     
@@ -117,7 +117,7 @@ class TestFollowersAPI:
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data['status'] == 'pending'
         assert str(response.data['follower_id']) == str(public_user.user_id)
-        assert str(response.data['followed_id']) == str(private_user.user_id)
+        assert str(response.data['following_id']) == str(private_user.user_id)
     
     def test_follow_self_forbidden(self, api_client, public_user):
         """
@@ -257,7 +257,7 @@ class TestFollowersAPI:
         assert response.status_code == status.HTTP_200_OK
         assert response.data['status'] == 'accepted'
         assert str(response.data['follower_id']) == str(public_user.user_id)
-        assert str(response.data['followed_id']) == str(private_user.user_id)
+        assert str(response.data['following_id']) == str(private_user.user_id)
         
         # Verify follow is accepted in database
         follow = Follow.objects.get(follower=public_user, following=private_user)
@@ -606,9 +606,9 @@ class TestFollowersAPI:
         for follow_req in response.data:
             assert 'follow_id' in follow_req
             assert 'follower_id' in follow_req
-            assert 'followed_id' in follow_req
+            assert 'following_id' in follow_req
             assert follow_req['status'] == 'pending'
-            assert follow_req['followed_id'] == str(private_user.user_id)
+            assert follow_req['following_id'] == str(private_user.user_id)
             assert 'created_at' in follow_req
     
     def test_get_pending_requests_empty_list(self, api_client, public_user):
@@ -735,7 +735,7 @@ class TestFollowersConformityWithSpecs:
         assert 'created_at' in field_names
         
         # Verify unique constraint
-        assert (['follower', 'following'],) in Follow._meta.unique_together
+        assert ('follower', 'following') in Follow._meta.unique_together
         
         # Verify check constraint
         constraints = [c.name for c in Follow._meta.constraints]

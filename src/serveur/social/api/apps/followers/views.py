@@ -33,8 +33,8 @@ class FollowUserView(APIView):
             
             return Response({
                 'follow_id': str(follow.follow_id),
-                'follower_id': str(follow.follower_id),
-                'followed_id': str(follow.followed_id),
+                'follower_id': str(follow.follower.user_id),
+                'following_id': str(follow.following.user_id),
                 'status': follow.status,
                 'created_at': follow.created_at
             }, status=status.HTTP_201_CREATED)
@@ -86,8 +86,8 @@ class AcceptFollowRequestView(APIView):
             
             return Response({
                 'follow_id': str(follow.follow_id),
-                'follower_id': str(follow.follower_id),
-                'followed_id': str(follow.followed_id),
+                'follower_id': str(follow.follower.user_id),
+                'following_id': str(follow.following.user_id),
                 'status': follow.status,
                 'created_at': follow.created_at
             }, status=status.HTTP_200_OK)
@@ -206,8 +206,8 @@ class PendingRequestsView(APIView):
 
         data = [{
             'follow_id': str(req.follow_id),
-            'follower_id': str(req.follower_id),
-            'followed_id': str(req.followed_id),
+            'follower_id': str(req.follower.user_id),
+            'following_id': str(req.following.user_id),
             'status': req.status,
             'created_at': req.created_at
         } for req in requests]

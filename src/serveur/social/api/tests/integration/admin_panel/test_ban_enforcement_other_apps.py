@@ -25,9 +25,9 @@ if not hasattr(Comment, "author"):
 if not hasattr(Forum, "name"):
     Forum.name = property(lambda self: self.forum_name)
 if not hasattr(FollowRepository, "get_follow"):
-    FollowRepository.get_follow = staticmethod(lambda follower_id, followed_id: None)
+    FollowRepository.get_follow = staticmethod(lambda follower_id, following_id: None)
 if not hasattr(Follow, "followed_id"):
-    Follow.followed_id = property(lambda self: self.following_id)
+    Follow.followed_id = property(lambda self: self.following.user_id)
 
 
 def _create_user(prefix: str) -> User:

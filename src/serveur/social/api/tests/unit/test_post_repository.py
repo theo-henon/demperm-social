@@ -36,20 +36,16 @@ def test_user(db):
         email='test@example.com',
         username='testuser'
     )
-    UserProfile.objects.create(user=user)
-    UserSettings.objects.create(user=user)
     return user
 
 @pytest.fixture
 def user2(db):
     """Create a second test user."""
-    user =  UserRepository.create(
+    user = UserRepository.create(
         firebase_id='user2-firebase-uid',
         email='user2@example.com',
         username='user2'
     )
-    UserProfile.objects.create(user=user)
-    UserSettings.objects.create(user=user)
     return user
 
 
@@ -63,19 +59,23 @@ def test_post(db, test_user):
         content='Test content for post'
     )
 @pytest.fixture
-def test_domain(db,test_user):
-
-    return DomainRepository.create("test forum creation","hello world")
+def test_domain(db, test_user):
+    return DomainRepository.create("test domain", "test domain description")
 
 
 @pytest.fixture
 def test_subforum(db, test_user, test_domain):
-    return SubforumRepository.create(test_user.user_id, "test subforum creation","hello world",parent_domain_id=test_domain.domain_id)
+    return SubforumRepository.create(
+        creator_id=test_user.user_id,
+        subforum_name="test subforum",
+        description="test subforum description",
+        parent_domain_id=test_domain.domain_id
+    )
 
 @pytest.mark.django_db
-class TestPostRepository(TestCase):
+class TestPostRepository:
 
-    def test_create_post_success(self,test_user):
+    def test_create_post_success(self, test_user):
         post = PostRepository.create(test_user.user_id, "test post creation","hello world")
         assert post is not None
         assert post.post_id is not None
@@ -94,8 +94,6 @@ class TestPostRepository(TestCase):
         assert post.post_id is not None
         assert post.comment_count == 0
         assert post.like_count == 0
-        assert post.subforum is None
-        assert post.content_signature is None
         assert post.user.user_id == test_user.user_id
         assert post.title == "test post creation"
         assert post.subforum == test_subforum
@@ -144,10 +142,10 @@ class TestPostRepository(TestCase):
         assert bysubforum[0].post_id == post.post_id
         assert bysubforum[0].user.user_id == test_user.user_id
 
-    def test_increment_and_decrement_likes(self,test_post):
+    def test_increment_and_decrement_likes(self, test_post):
         count = PostRepository.get_by_id(test_post.post_id).like_count
-        PostRepository.increment_comment_count(test_post.post_id)
-        assert PostRepository.get_by_id(test_post.post_id).like_count == count +1
-        PostRepository.decrement_comment_count(test_post.post_id)
+        PostRepository.increment_like_count(test_post.post_id)
+        assert PostRepository.get_by_id(test_post.post_id).like_count == count + 1
+        PostRepository.decrement_like_count(test_post.post_id)
         assert PostRepository.get_by_id(test_post.post_id).like_count == count
 

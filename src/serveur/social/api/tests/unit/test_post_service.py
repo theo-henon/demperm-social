@@ -24,7 +24,7 @@ class PostServiceTest(unittest.TestCase):
         # Create users
         # Create user
         self.user = UserRepository.create(
-            firebase_id= str(uuid.uuid4()),
+            firebase_uid=str(uuid.uuid4()),
             email="user@gmail.com",
             username="alice",
 
@@ -32,13 +32,13 @@ class PostServiceTest(unittest.TestCase):
 
         # Create viewer user (for permission tests)
         self.viewer = UserRepository.create(
-            firebase_id=str(uuid.uuid4()),
+            firebase_uid=str(uuid.uuid4()),
             email="viewer@gmail.com",
             username="bob",
         )
 
         self.blocked = UserRepository.create(
-            firebase_id=str(uuid.uuid4()),
+            firebase_uid=str(uuid.uuid4()),
             email="hank@gmail.com",
             username="hank",
         )
@@ -53,7 +53,7 @@ class PostServiceTest(unittest.TestCase):
             email="patrick@gmail.com",
             username="patrick",
         )
-        updates = {"privacy": "private"}
+        updates = {"privacy": False}
 
         UserService.update_user_profile(self.private.user_id,**updates)
 

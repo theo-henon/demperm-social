@@ -240,14 +240,19 @@ class UserService:
         """Block a user."""
         if blocker_id == blocked_id:
             raise ValidationError("Cannot block yourself")
-        
-        # Check if already blocked
+
+        # Check if user to block exists
+        blocked_user = UserRepository.get_by_id(blocked_id)
+        if not blocked_user:
+            raise NotFoundError(f"User {blocked_id} not found")
+
+        # Check if already blocked (idempotent - just return if already blocked)
         if BlockRepository.is_blocked(blocker_id, blocked_id):
-            raise ConflictError("User already blocked")
-        
+            return  # Already blocked, operation is idempotent
+
         # Create block
         BlockRepository.create(blocker_id, blocked_id)
-        
+
         # Audit log
         AuditLogRepository.create(
             user_id=blocker_id,
@@ -301,7 +306,8 @@ class UserService:
         target_user = UserService.get_user_by_id(target_user_id)
 
         # Public profiles are always visible
-        if target_user.profile.privacy == 'public':
+        # privacy=True means public, privacy=False means private
+        if target_user.profile.privacy == True:
             return True
 
         # Not authenticated cannot view private profiles

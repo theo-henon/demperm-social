@@ -44,7 +44,8 @@ class FollowerService:
             raise NotFoundError(f"User {followed_id} not found")
         
         # Determine initial status based on privacy
-        if followed_user.profile.privacy == 'public':
+        # privacy=True means public, privacy=False means private
+        if followed_user.profile.privacy == True:
             status = 'accepted'
         else:
             status = 'pending'

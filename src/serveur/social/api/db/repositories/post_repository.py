@@ -37,10 +37,27 @@ class PostRepository:
     
     @staticmethod
     def get_feed(user_id: str, page: int = 1, page_size: int = 20) -> List[Post]:
-        """Get personalized feed for user."""
-        # TODO: Implement logic to get posts from followed users and subscribed forums
+        """Get personalized feed for user - posts from followed users and subscribed subforums."""
+        from django.db.models import Q
+        from db.entities.user_entity import Follow
+        from db.entities.domain_entity import SubforumSubscription
+
+        # Get IDs of users that current user follows (with accepted status)
+        following_ids = Follow.objects.filter(
+            follower_id=user_id,
+            status='accepted'
+        ).values_list('following_id', flat=True)
+
+        # Get IDs of subforums that current user is subscribed to
+        subscribed_subforum_ids = SubforumSubscription.objects.filter(
+            user_id=user_id
+        ).values_list('subforum_id', flat=True)
+
+        # Get posts from followed users OR subscribed subforums
         offset = (page - 1) * page_size
-        return Post.objects.select_related('user', 'user__profile', 'subforum').order_by('-created_at')[offset:offset + page_size]
+        return Post.objects.filter(
+            Q(user_id__in=following_ids) | Q(subforum_id__in=subscribed_subforum_ids)
+        ).select_related('user', 'user__profile', 'subforum').order_by('-created_at')[offset:offset + page_size]
     
     @staticmethod
     def get_discover(page: int = 1, page_size: int = 20) -> List[Post]:
@@ -87,12 +104,15 @@ class CommentRepository:
     @staticmethod
     def create(user_id: str, post_id: str, content: str, parent_comment_id: Optional[str] = None) -> Comment:
         """Create a new comment."""
-        return Comment.objects.create(
+        comment = Comment.objects.create(
             user_id=user_id,
             post_id=post_id,
             content=content,
             parent_comment_id=parent_comment_id
         )
+        # Increment comment count on the post
+        PostRepository.increment_comment_count(post_id)
+        return comment
     
     @staticmethod
     def get_by_id(comment_id: str) -> Optional[Comment]:
@@ -104,9 +124,19 @@ class CommentRepository:
     
     @staticmethod
     def delete(comment_id: str) -> bool:
-        """Delete a comment."""
-        deleted, _ = Comment.objects.filter(comment_id=comment_id).delete()
-        return deleted > 0
+        """Delete a comment and all its replies (cascade)."""
+        # Get the comment to retrieve post_id before deletion
+        comment = Comment.objects.filter(comment_id=comment_id).first()
+        if comment:
+            post_id = comment.post_id
+            # Django's CASCADE will delete all replies, but deleted count includes them
+            deleted, _ = Comment.objects.filter(comment_id=comment_id).delete()
+            if deleted > 0:
+                # Decrement comment count by the number of comments deleted (parent + all replies)
+                for _ in range(deleted):
+                    PostRepository.decrement_comment_count(post_id)
+                return True
+        return False
     
     @staticmethod
     def get_by_post(post_id: str, page: int = 1, page_size: int = 20, sort_by: str = "created_at") -> List[Comment]:

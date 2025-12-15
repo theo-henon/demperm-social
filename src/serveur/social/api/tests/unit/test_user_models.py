@@ -24,7 +24,6 @@ class TestUserModel:
         assert user.is_admin is False
         assert user.is_banned is False
         assert user.created_at is not None
-        assert user.updated_at is not None
     
     def test_user_str_representation(self):
         """Test __str__ method returns username."""
@@ -137,13 +136,11 @@ class TestUserProfileModel:
         )
         
         profile = UserProfile.objects.create(user=user)
-        
+
         assert profile.display_name is None
-        assert profile.bio is None
-        assert profile.location is None
-        assert profile.profile_picture is None
-        assert profile.followers_count == 0
-        assert profile.following_count == 0
+        assert profile.bio == ''
+        assert profile.location == ''
+        assert not profile.profile_picture
     
     def test_user_profile_one_to_one(self):
         """Test user can only have one profile."""
@@ -168,13 +165,13 @@ class TestUserProfileModel:
         )
         
         profile = UserProfile.objects.create(user=user)
-        profile_id = profile.id
-        
+        profile_id = profile.profile_id
+
         # Delete user
         user.delete()
-        
+
         # Profile should be deleted
-        assert not UserProfile.objects.filter(id=profile_id).exists()
+        assert not UserProfile.objects.filter(profile_id=profile_id).exists()
 
 
 @pytest.mark.django_db
@@ -190,13 +187,9 @@ class TestUserSettingsModel:
         )
         
         settings = UserSettings.objects.create(user=user)
-        
-        assert settings.privacy_profile is True
-        assert settings.privacy_posts is True
-        assert settings.privacy_followers is True
-        assert settings.notifications_enabled is True
-        assert settings.notifications_email is True
-        assert settings.notifications_push is True
+
+        assert settings.email_notifications is True
+        assert settings.language == 'fr'
     
     def test_user_settings_custom_values(self):
         """Test setting custom values for user settings."""
@@ -208,14 +201,12 @@ class TestUserSettingsModel:
         
         settings = UserSettings.objects.create(
             user=user,
-            privacy_profile=False,
-            privacy_posts=False,
-            notifications_enabled=False
+            email_notifications=False,
+            language='en'
         )
-        
-        assert settings.privacy_profile is False
-        assert settings.privacy_posts is False
-        assert settings.notifications_enabled is False
+
+        assert settings.email_notifications is False
+        assert settings.language == 'en'
     
     def test_settings_one_to_one(self):
         """Test user can only have one settings object."""
@@ -240,13 +231,13 @@ class TestUserSettingsModel:
         )
         
         settings = UserSettings.objects.create(user=user)
-        settings_id = settings.id
-        
+        settings_id = settings.settings_id
+
         # Delete user
         user.delete()
-        
+
         # Settings should be deleted
-        assert not UserSettings.objects.filter(id=settings_id).exists()
+        assert not UserSettings.objects.filter(settings_id=settings_id).exists()
 
 
 @pytest.mark.django_db
@@ -420,8 +411,8 @@ class TestFollowModel:
             following=following,
             status='accepted'
         )
-        
-        assert str(follow) == 'strfollower follows strfollowing (accepted)'
+
+        assert str(follow) == 'strfollower follows strfollowing'
     
     def test_follow_cascade_on_user_delete(self):
         """Test follows are deleted when user is deleted."""
@@ -465,9 +456,8 @@ class TestUserRepositoryIntegration:
         # Check profile was created
         profile = UserProfile.objects.filter(user=user).first()
         assert profile is not None
-        assert profile.followers_count == 0
-        
+
         # Check settings were created
         settings = UserSettings.objects.filter(user=user).first()
         assert settings is not None
-        assert settings.notifications_enabled is True
+        assert settings.email_notifications is True

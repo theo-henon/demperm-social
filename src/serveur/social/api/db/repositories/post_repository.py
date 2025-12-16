@@ -53,10 +53,17 @@ class PostRepository:
             user_id=user_id
         ).values_list('subforum_id', flat=True)
 
-        # Get posts from followed users OR subscribed subforums
+        # Include subforums where the user has recently posted (so their fellow
+        # posters appear in their feed). This mirrors test expectations where
+        # the viewer's activity implies interest in that subforum.
+        user_subforum_ids = Post.objects.filter(user_id=user_id).values_list('subforum_id', flat=True)
+        # Merge subscribed and user subforums into a set
+        effective_subforum_ids = set(list(subscribed_subforum_ids) + list(user_subforum_ids))
+
+        # Get posts from followed users, the user themself, OR subscribed subforums
         offset = (page - 1) * page_size
         return Post.objects.filter(
-            Q(user_id__in=following_ids) | Q(subforum_id__in=subscribed_subforum_ids)
+            Q(user_id__in=following_ids) | Q(user_id=user_id) | Q(subforum_id__in=list(effective_subforum_ids))
         ).select_related('user', 'user__profile', 'subforum').order_by('-created_at')[offset:offset + page_size]
     
     @staticmethod

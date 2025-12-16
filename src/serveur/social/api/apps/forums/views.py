@@ -397,7 +397,7 @@ class CreateForumSubforumView(APIView):
                     return Response({'error': {'code': 'VALIDATION_ERROR', 'message': 'Parent subforum does not belong to this forum'}}, status=status.HTTP_400_BAD_REQUEST)
 
                 # create nested subforum under the given parent
-                subforum = DomainService.create_subforum_in_subforum(
+                subforum = ForumService.create_subforum_in_subforum(
                     user_id=str(request.user.user_id),
                     parent_subforum_id=str(parent_subforum_id),
                     name=name,

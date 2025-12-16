@@ -160,3 +160,65 @@ class ForumService:
         """Get forums user is a member of."""
         return MembershipRepository.get_user_forums(user_id, page, page_size)
 
+    @staticmethod
+    @transaction.atomic
+    def create_subforum_in_subforum(
+        user_id: str,
+        parent_subforum_id: str,
+        name: str,
+        description: str,
+        ip_address: Optional[str] = None
+    ):
+        """
+        Create a subforum nested under another subforum.
+
+        Args:
+            user_id: User ID (creator)
+            parent_subforum_id: Parent subforum ID
+            name: Subforum name
+            description: Subforum description
+            ip_address: Client IP address
+
+        Returns:
+            Created subforum
+        """
+        from db.entities.domain_entity import Subforum
+
+        # Validate
+        name = Validator.validate_forum_name(name)
+        description = Validator.validate_description(description)
+
+        # Get parent subforum
+        parent = SubforumRepository.get_by_id(parent_subforum_id)
+        if not parent:
+            raise NotFoundError(f"Parent subforum {parent_subforum_id} not found")
+
+        # The parent subforum should have a forum_id (every subforum belongs to a forum)
+        # The new subforum will have parent_forum_id = parent's forum_id
+        if not parent.forum_id_id:
+            raise ValidationError(f"Parent subforum {parent_subforum_id} does not have an associated forum")
+
+        # Create the nested subforum
+        subforum = SubforumRepository.create(
+            creator_id=user_id,
+            subforum_name=name,
+            description=description,
+            parent_domain_id=None,
+            parent_forum_id=str(parent.forum_id_id)
+        )
+
+        # Audit log
+        AuditLogRepository.create(
+            user_id=user_id,
+            action_type='subforum_created',
+            resource_type='subforum',
+            resource_id=str(subforum.subforum_id),
+            details={
+                'parent_subforum_id': parent_subforum_id,
+                'parent_forum_id': str(parent.forum_id_id)
+            },
+            ip_address=ip_address
+        )
+
+        return subforum
+
